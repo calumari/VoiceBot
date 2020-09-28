@@ -23,6 +23,28 @@ db.prepare(
 `,
 ).run();
 
+db.prepare(
+	`
+    CREATE TABLE IF NOT EXISTS user_prefs (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        user_limit INTEGER,
+        bitrate INTEGER
+    );
+`,
+).run();
+
+db.prepare(
+	`
+    CREATE TABLE IF NOT EXISTS user_pref_roles (
+        id TEXT PRIMARY KEY,
+        value INTEGER,
+        user_id TEXT NOT NULL,
+        FOREIGN KEY(user_id) REFERENCES user_prefs(id)
+    );
+`,
+).run();
+
 if (process.env.NODE_ENV === 'development') {
 	db.prepare(
 		'INSERT OR IGNORE INTO guilds (id, channel_id) VALUES (759074315928600576, 760151198354898955);',
@@ -31,10 +53,21 @@ if (process.env.NODE_ENV === 'development') {
 
 module.exports = {
 	selectChannels: db.prepare('SELECT * FROM channels;'),
-	selectChannelById: db.prepare('SELECT * FROM channels WHERE id=?;'),
+	selectChannelById: db.prepare('SELECT owner_id FROM channels WHERE id=?;'),
+	selectChannelByOwnerId: db.prepare('SELECT id FROM channels WHERE owner_id=?;'),
 	insertChannel: db.prepare(
 		'INSERT INTO channels (id, owner_id) VALUES (?, ?);',
 	),
 	deleteChannel: db.prepare('DELETE FROM channels WHERE id=?;'),
 	selectGuildById: db.prepare('SELECT channel_id FROM guilds WHERE id=?;'),
+	selectUserPreferences: id => {
+		return db.prepare('SELECT * FROM user_prefs WHERE id=?').get(id);
+	},
+	insertUserPreference: db.prepare(
+		'INSERT INTO user_prefs (id, name, user_limit, bitrate) VALUES (?, ?, ?, ?)',
+	),
+	deleteUserPreferences: id => {
+		db.prepare('DELETE FROM user_pref_roles WHERE user_id=?;').run(id);
+		db.prepare('DELETE FROM user_prefs WHERE id=?;').run(id);
+	},
 };

@@ -1,18 +1,19 @@
 const Discord = require('discord.js');
+
 const db = require('./db');
 const config = require('./config');
 
 const client = new Discord.Client();
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-	const { channel_id: id } = db.selectGuildById.get(newState.guild.id);
-	if (id === undefined) return;
+	const { channel_id: channelID } = db.selectGuildById.get(newState.guild.id);
+	if (channelID === undefined) return;
 	// todo: user cooldown
 
-	if (newState.channelID === id) {
-		const name = `${newState.member.displayName}'s channel`; // todo: db
+	if (newState.channelID === channelID) {
+		const prefs = db.selectUserPreferences(newState.member.id) || {};
 		newState.guild.channels
-			.create(name, {
+			.create(prefs.name || `${newState.member.displayName}'s channel`, {
 				type: 'voice',
 				parent: newState.channel.parentID,
 				permissionOverwrites: [
@@ -46,8 +47,16 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 });
 
 client.on('channelUpdate', (old, updated) => {
-	if (db.selectChannelById.get(oldState.channelID) !== undefined) return;
-	// todo: save channel settings in db
+	const channel = db.selectChannelById.get(updated.id);
+	if (channel === undefined) return;
+
+	db.deleteUserPreferences(channel['owner_id']);
+	db.insertUserPreference.run(
+		channel['owner_id'],
+		updated.name,
+		updated.userLimit,
+		updated.bitrate,
+	);
 });
 
 client.login(config.token);
