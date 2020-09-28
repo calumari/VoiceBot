@@ -7,9 +7,8 @@ const client = new Discord.Client();
 const cooldowns = new Discord.Collection();
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-    const { channel_id: channelID } = db.selectGuildById.get(newState.guild.id);
+    const { channel_id: channelID } = db.selectGuildById.get(newState.guild.id) || {};
     if (channelID === undefined) return;
-    // todo: user cooldown
 
     if (db.selectChannelById.get(oldState.channelID) !== undefined) {
         const channel = oldState.guild.channels.resolve(oldState.channelID);
@@ -55,20 +54,20 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 });
 
 client.on('channelUpdate', (old, updated) => {
-    const channel = db.selectChannelById.get(updated.id);
-    if (channel === undefined) return;
+    const { owner_id: ownerID } = db.selectChannelById.get(updated.id) || {};
+    if (ownerID === undefined) return;
 
-    db.deleteUserPreferences(channel['owner_id']);
-    db.insertUserPreference.run(channel['owner_id'], updated.name, updated.userLimit, updated.bitrate);
+    db.deleteUserPreferences(ownerID);
+    db.insertUserPreference.run(ownerID, updated.name, updated.userLimit, updated.bitrate);
 
     for (const overwrite of updated.permissionOverwrites.values()) {
-        if (overwrite.id === channel['owner_id'] && overwrite.type === 'member') continue;
+        if (overwrite.id === ownerID && overwrite.type === 'member') continue;
         db.insertUserPreferencePermissions.run(
             overwrite.id,
             overwrite.type,
             overwrite.allow.bitfield,
             overwrite.deny.bitfield,
-            channel['owner_id']
+            ownerID
         );
     }
 });
