@@ -29,7 +29,9 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 			.catch(error => {
 				// todo: send user a message?
 			});
-	} else if (db.selectChannelById.get(oldState.channelID) !== undefined) {
+	}
+
+	if (db.selectChannelById.get(oldState.channelID) !== undefined) {
 		const channel = oldState.guild.channels.resolve(oldState.channelID);
 		if (channel.members.size > 0) return;
 		channel
