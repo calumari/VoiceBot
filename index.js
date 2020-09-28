@@ -25,8 +25,9 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     }
 
     if (newState.channelID === channelID) {
-        if (cooldowns.has(newState.member.id) && Date.now() - cooldowns.get(newState.member.id) < 15000) {
+        if (cooldowns.has(newState.member.id) && Date.now() - cooldowns.get(newState.member.id) < 5000) {
             newState.member.send('Quit creating channels so fast!');
+            newState.member.voice.kick();
             return;
         }
 
