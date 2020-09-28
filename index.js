@@ -4,13 +4,32 @@ const db = require('./db');
 const config = require('./config');
 
 const client = new Discord.Client();
+const cooldowns = new Discord.Collection();
 
 client.on('voiceStateUpdate', (oldState, newState) => {
     const { channel_id: channelID } = db.selectGuildById.get(newState.guild.id);
     if (channelID === undefined) return;
     // todo: user cooldown
 
+    if (db.selectChannelById.get(oldState.channelID) !== undefined) {
+        const channel = oldState.guild.channels.resolve(oldState.channelID);
+        if (channel.members.size > 0) return;
+        channel
+            .delete()
+            .catch(error => {
+                // todo: send message why this failed
+            })
+            .finally(() => {
+                db.deleteChannel.run(oldState.channelID);
+            });
+    }
+
     if (newState.channelID === channelID) {
+        if (cooldowns.has(newState.member.id) && Date.now() - cooldowns.get(newState.member.id) < 15000) {
+            newState.member.send('Quit creating channels so fast!');
+            return;
+        }
+
         const prefs = db.selectUserPreferences(newState.member.id);
 
         const defaultOverwrites = [{ id: newState.member.id, allow: 300942864 }];
@@ -34,19 +53,9 @@ client.on('voiceStateUpdate', (oldState, newState) => {
             })
             .catch(error => {
                 // todo: send user a message?
-            });
-    }
-
-    if (db.selectChannelById.get(oldState.channelID) !== undefined) {
-        const channel = oldState.guild.channels.resolve(oldState.channelID);
-        if (channel.members.size > 0) return;
-        channel
-            .delete()
-            .catch(error => {
-                // todo: send message why this failed
             })
             .finally(() => {
-                db.deleteChannel.run(oldState.channelID);
+                cooldowns.set(newState.member.id, Date.now()); // todo: move to db if/when sharding!!
             });
     }
 });
