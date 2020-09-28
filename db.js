@@ -1,0 +1,40 @@
+const dir = './data';
+
+const fs = require('fs');
+!fs.existsSync(dir) && fs.mkdirSync(dir);
+
+const db = require('better-sqlite3')(`${dir}/db.sqlite`);
+
+db.prepare(
+	`
+    CREATE TABLE IF NOT EXISTS guilds (
+        id TEXT PRIMARY KEY,
+        channel_id TEXT NOT NULL
+    );
+    `,
+).run();
+
+db.prepare(
+	`
+    CREATE TABLE IF NOT EXISTS channels (
+        id TEXT PRIMARY KEY,
+        owner_id TEXT NOT NULL
+    );
+`,
+).run();
+
+if (process.env.NODE_ENV === 'development') {
+	db.prepare(
+		'INSERT OR IGNORE INTO guilds (id, channel_id) VALUES (759074315928600576, 760151198354898955);',
+	).run();
+}
+
+module.exports = {
+	selectChannels: db.prepare('SELECT * FROM channels;'),
+	selectChannelById: db.prepare('SELECT * FROM channels WHERE id=?;'),
+	insertChannel: db.prepare(
+		'INSERT INTO channels (id, owner_id) VALUES (?, ?);',
+	),
+	deleteChannel: db.prepare('DELETE FROM channels WHERE id=?;'),
+	selectGuildById: db.prepare('SELECT channel_id FROM guilds WHERE id=?;'),
+};
