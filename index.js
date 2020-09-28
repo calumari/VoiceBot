@@ -13,12 +13,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 	if (newState.channelID === channelID) {
 		const prefs = db.selectUserPreferences(newState.member.id);
 
-		const defaultOverwrites = [
-			{
-				id: newState.member.id,
-				allow: 300942864,
-			},
-		];
+		const defaultOverwrites = [{ id: newState.member.id, allow: 300942864 }];
 		const permissionOverwrites = prefs.permissionOverwrites.map(o1 =>
 			Object.assign(
 				o1,
@@ -29,6 +24,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 		newState.guild.channels
 			.create(prefs.name || `${newState.member.displayName}'s channel`, {
 				type: 'voice',
+				position: newState.channel.position + 1,
 				parent: newState.channel.parentID,
 				permissionOverwrites,
 			})
