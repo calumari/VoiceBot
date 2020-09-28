@@ -13,15 +13,16 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 
     if (db.selectChannelById.get(oldState.channelID) !== undefined) {
         const channel = oldState.guild.channels.resolve(oldState.channelID);
-        if (channel.members.size > 0) return;
-        channel
-            .delete()
-            .catch(error => {
-                // todo: send message why this failed
-            })
-            .finally(() => {
-                db.deleteChannel.run(oldState.channelID);
-            });
+        if (channel.members.size === 0) {
+            channel
+                .delete()
+                .catch(error => {
+                    // todo: send message why this failed
+                })
+                .finally(() => {
+                    db.deleteChannel.run(oldState.channelID);
+                });
+        }
     }
 
     if (newState.channelID === channelID) {
