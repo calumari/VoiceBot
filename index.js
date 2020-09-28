@@ -11,17 +11,26 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 	// todo: user cooldown
 
 	if (newState.channelID === channelID) {
-		const prefs = db.selectUserPreferences(newState.member.id) || {};
+		const prefs = db.selectUserPreferences(newState.member.id);
+
+		const defaultOverwrites = [
+			{
+				id: newState.member.id,
+				allow: 300942864,
+			},
+		];
+		const permissionOverwrites = prefs.permissionOverwrites.map(o1 =>
+			Object.assign(
+				o1,
+				defaultOverwrites.find(o2 => o1.id === o2.id),
+			),
+		);
+
 		newState.guild.channels
 			.create(prefs.name || `${newState.member.displayName}'s channel`, {
 				type: 'voice',
 				parent: newState.channel.parentID,
-				permissionOverwrites: [
-					{
-						id: newState.member.id,
-						allow: ['CONNECT', 'VIEW_CHANNEL'],
-					},
-				],
+				permissionOverwrites,
 			})
 			.then(channel => {
 				newState.member.voice.setChannel(channel);
@@ -57,6 +66,16 @@ client.on('channelUpdate', (old, updated) => {
 		updated.userLimit,
 		updated.bitrate,
 	);
+
+	for (const overwrite of updated.permissionOverwrites.values()) {
+		db.insertUserPreferencePermissions.run(
+			overwrite.id,
+			overwrite.type,
+			overwrite.allow.bitfield,
+			overwrite.deny.bitfield,
+			channel['owner_id'],
+		);
+	}
 });
 
 client.login(config.token);
