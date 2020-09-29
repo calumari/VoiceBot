@@ -20,7 +20,7 @@ db.prepare(
         id TEXT PRIMARY KEY,
         owner_id TEXT NOT NULL
     );
-`
+    `
 ).run();
 
 db.prepare(
@@ -31,7 +31,7 @@ db.prepare(
         user_limit INTEGER,
         bitrate INTEGER
     );
-`
+    `
 ).run();
 
 db.prepare(
@@ -44,7 +44,7 @@ db.prepare(
         user_id TEXT NOT NULL,
         FOREIGN KEY(user_id) REFERENCES user_prefs(id)
     );
-`
+    `
 ).run();
 
 if (process.env.NODE_ENV === 'development') {
