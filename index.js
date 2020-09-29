@@ -10,7 +10,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
     const { channel_id: channelId } = db.selectGuildById.get(newState.guild.id) || {};
     if (channelId === undefined) return;
 
-    if (db.selectChannelById.get(oldState.channelID) !== undefined) {
+    if (oldState.channel !== null && db.selectChannelById.get(oldState.channelID) !== undefined) {
         const channel = oldState.guild.channels.resolve(oldState.channelID);
         if (channel.members.size === 0) {
             channel
