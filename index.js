@@ -26,7 +26,16 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 
     if (newState.channelID === channelId) {
         if (cooldowns.has(newState.member.id) && Date.now() - cooldowns.get(newState.member.id) < 5000) {
-            newState.member.send('Quit creating channels so fast!');
+            newState.member.send({
+                embed: {
+                    title: 'Hey, slow down!',
+                    description: "You're creating channels too fast, please try again in 5 seconds!",
+                    footer: {
+                        icon_url: newState.guild.iconURL(),
+                        text: `${newState.guild.name}`,
+                    },
+                },
+            });
             newState.member.voice.kick();
             return;
         }
