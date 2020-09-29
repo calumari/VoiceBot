@@ -7,8 +7,8 @@ const client = new Discord.Client();
 const cooldowns = new Discord.Collection();
 
 client.on('voiceStateUpdate', (oldState, newState) => {
-    const { channel_id: channelID } = db.selectGuildById.get(newState.guild.id) || {};
-    if (channelID === undefined) return;
+    const { channel_id: channelId } = db.selectGuildById.get(newState.guild.id) || {};
+    if (channelId === undefined) return;
 
     if (db.selectChannelById.get(oldState.channelID) !== undefined) {
         const channel = oldState.guild.channels.resolve(oldState.channelID);
@@ -24,7 +24,7 @@ client.on('voiceStateUpdate', (oldState, newState) => {
         }
     }
 
-    if (newState.channelID === channelID) {
+    if (newState.channelID === channelId) {
         if (cooldowns.has(newState.member.id) && Date.now() - cooldowns.get(newState.member.id) < 5000) {
             newState.member.send('Quit creating channels so fast!');
             newState.member.voice.kick();
@@ -54,20 +54,20 @@ client.on('voiceStateUpdate', (oldState, newState) => {
 });
 
 client.on('channelUpdate', (old, updated) => {
-    const { owner_id: ownerID } = db.selectChannelById.get(updated.id) || {};
-    if (ownerID === undefined) return;
+    const { owner_id: ownerId } = db.selectChannelById.get(updated.id) || {};
+    if (ownerId === undefined) return;
 
-    db.deleteUserPreferences(ownerID);
-    db.insertUserPreference.run(ownerID, updated.name, updated.userLimit, updated.bitrate);
+    db.deleteUserPreferences(ownerId);
+    db.insertUserPreference.run(ownerId, updated.name, updated.userLimit, updated.bitrate);
 
     for (const overwrite of updated.permissionOverwrites.values()) {
-        if (overwrite.id === ownerID && overwrite.type === 'member') continue;
+        if (overwrite.id === ownerId && overwrite.type === 'member') continue;
         db.insertUserPreferencePermissions.run(
             overwrite.id,
             overwrite.type,
             overwrite.allow.bitfield,
             overwrite.deny.bitfield,
-            ownerID
+            ownerId
         );
     }
 });
