@@ -5,7 +5,7 @@ exports.run = (client, message, args) => {
             type: 'voice',
         })
         .then(channel => {
-            client.db.insertGuild.run(message.guild.id, channel.id);
+            client.db.updateGuildChannel.run(channel.id, message.guild.id);
         })
         .catch(err => {
             // todo: send permission message!

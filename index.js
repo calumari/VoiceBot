@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 const { readdirSync } = require('fs');
 
+require('./extensions/VoiceGuild');
+
 const config = require('./config');
 const client = new Discord.Client(); // todo: move to own class
 

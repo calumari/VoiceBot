@@ -9,7 +9,8 @@ db.prepare(
     `
     CREATE TABLE IF NOT EXISTS guilds (
         id TEXT PRIMARY KEY,
-        channel_id TEXT NOT NULL
+        channel_id TEXT,
+        prefix TEXT
     );
     `
 ).run();
@@ -48,13 +49,16 @@ db.prepare(
 ).run();
 
 module.exports = {
-    insertGuild: db.prepare('INSERT INTO guilds (id, channel_id) VALUES (?, ?)'),
+    selectGuildById: db.prepare('SELECT channel_id, prefix FROM guilds WHERE id=?;'),
+    insertGuild: db.prepare('INSERT INTO guilds (id) VALUES (?)'),
+    updateGuildChannel: db.prepare('UPDATE guilds SET channel_id=? WHERE id=?'),
+    updateGuildPrefix: db.prepare('UPDATE guilds SET prefix=? WHERE id=?'),
+
     selectChannels: db.prepare('SELECT * FROM channels;'),
     selectChannelById: db.prepare('SELECT owner_id FROM channels WHERE id=?;'),
     selectChannelByOwnerId: db.prepare('SELECT id FROM channels WHERE owner_id=?;'),
     insertChannel: db.prepare('INSERT INTO channels (id, owner_id) VALUES (?, ?);'),
     deleteChannel: db.prepare('DELETE FROM channels WHERE id=?;'),
-    selectGuildById: db.prepare('SELECT channel_id FROM guilds WHERE id=?;'),
     selectUserPreferences: id => {
         return {
             ...db.prepare('SELECT * FROM user_prefs WHERE id=?').get(id),

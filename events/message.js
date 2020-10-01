@@ -11,10 +11,9 @@ module.exports = (client, message) => {
     const cmd = args.shift().toLowerCase();
 
     const command = client.commands.get(cmd) || client.aliases.get(cmd);
-    if (command !== null) {
-        // todo check perms
-        command.run(client, message, args);
-    } else {
-        // todo: send help!
-    }
+    if (!command) return; // todo: send help!
+
+    // todo perm check
+
+    command.run(client, message, args);
 };
