@@ -7,7 +7,7 @@ module.exports = (client, message) => {
     if (!prefixRegex.test(message.content)) return;
 
     const [, match] = message.content.match(prefixRegex);
-    const args = message.content.slice(match.length).trim().split(/\\s+/g);
+    const args = message.content.slice(match.length).trim().split(/\s+/g);
     const cmd = args.shift().toLowerCase();
 
     const command = client.commands.get(cmd) || client.aliases.get(cmd);
