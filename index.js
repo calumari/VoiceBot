@@ -2,8 +2,25 @@ const Discord = require('discord.js');
 const { readdirSync } = require('fs');
 
 const config = require('./config');
-const client = new Discord.Client();
+const client = new Discord.Client(); // todo: move to own class
+
 client.db = require('./utils/db');
+
+client.commands = new Discord.Collection();
+client.aliases = new Discord.Collection();
+
+readdirSync('./commands')
+    .filter(f => f.endsWith('.js'))
+    .forEach(f => {
+        const command = require(`./commands/${f}`);
+        client.commands.set(command.usage.name, command);
+        if (command.usage.aliases !== undefined) {
+            for (const alias of command.usage.aliases) {
+                client.aliases.set(alias, command);
+            }
+        }
+        delete require.cache[require.resolve(`./commands/${f}`)];
+    });
 
 readdirSync('./events')
     .filter(f => f.endsWith('.js'))

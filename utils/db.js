@@ -47,11 +47,8 @@ db.prepare(
     `
 ).run();
 
-if (process.env.NODE_ENV === 'development') {
-    db.prepare('INSERT OR IGNORE INTO guilds (id, channel_id) VALUES (759074315928600576, 760151198354898955);').run();
-}
-
 module.exports = {
+    insertGuild: db.prepare('INSERT INTO guilds (id, channel_id) VALUES (?, ?)'),
     selectChannels: db.prepare('SELECT * FROM channels;'),
     selectChannelById: db.prepare('SELECT owner_id FROM channels WHERE id=?;'),
     selectChannelByOwnerId: db.prepare('SELECT id FROM channels WHERE owner_id=?;'),
