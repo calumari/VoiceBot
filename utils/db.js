@@ -49,7 +49,8 @@ db.prepare(
 ).run();
 
 module.exports = {
-    selectGuildById: db.prepare('SELECT channel_id, prefix FROM guilds WHERE id=?;'),
+    selectGuildById: db.prepare('SELECT channel_id FROM guilds WHERE id=?;'),
+    selectGuildPrefix: db.prepare('SELECT prefix FROM guilds WHERE id=?;'),
     insertGuild: db.prepare('INSERT INTO guilds (id) VALUES (?)'),
     updateGuildChannel: db.prepare('UPDATE guilds SET channel_id=? WHERE id=?'),
     updateGuildPrefix: db.prepare('UPDATE guilds SET prefix=? WHERE id=?'),
