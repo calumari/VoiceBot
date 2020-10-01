@@ -10,5 +10,6 @@ exports.run = (client, message, args) => {
 
 exports.usage = {
     name: 'prefix',
-    aliases: ['setprefix']
+    aliases: ['setprefix'],
+    userPermissions: ['ADMINISTRATOR'],
 };

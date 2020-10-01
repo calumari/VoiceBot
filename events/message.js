@@ -10,12 +10,11 @@ module.exports = (client, message) => {
     const args = message.content.slice(match.length).trim().split(/\s+/g);
     const cmd = args.shift().toLowerCase();
 
-
-
     const command = client.commands.get(cmd) || client.aliases.get(cmd);
     if (!command) return; // todo: send help!
 
-    // todo perm check
+    if (!message.member.hasPermission(command.usage.userPermissions)) return;
+    if (!message.guild.me.hasPermission(command.usage.clientPermissions)) return;
 
     command.run(client, message, args);
 };

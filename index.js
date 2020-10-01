@@ -3,9 +3,9 @@ const { readdirSync } = require('fs');
 
 require('./extensions/VoiceGuild');
 
-const config = require('./config');
 const client = new Discord.Client(); // todo: move to own class
 
+client.config = require('./config');
 client.db = require('./utils/db');
 
 client.commands = new Discord.Collection();
@@ -33,4 +33,4 @@ readdirSync('./events')
         delete require.cache[require.resolve(`./events/${f}`)];
     });
 
-client.login(config.token);
+client.login(client.config.token);

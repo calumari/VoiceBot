@@ -14,4 +14,6 @@ exports.run = (client, message, args) => {
 
 exports.usage = {
     name: 'setup',
+    userPermissions: ['ADMINISTRATOR'],
+    clientPermissions: ['MANAGE_CHANNELS'],
 };
