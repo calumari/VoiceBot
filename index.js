@@ -3,6 +3,7 @@ const { readdirSync } = require('fs');
 
 const config = require('./config');
 const client = new Discord.Client();
+client.db = require('./utils/db');
 
 readdirSync('./events')
     .filter(f => f.endsWith('.js'))

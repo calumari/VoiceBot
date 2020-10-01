@@ -1,15 +1,13 @@
-const db = require('../utils/db');
-
-module.exports = (old, updated) => {
+module.exports = (client, old, updated) => {
     const { owner_id: ownerId } = db.selectChannelById.get(updated.id) || {};
     if (ownerId === undefined) return;
 
-    db.deleteUserPreferences(ownerId);
-    db.insertUserPreference.run(ownerId, updated.name, updated.userLimit, updated.bitrate);
+    client.db.deleteUserPreferences(ownerId);
+    cliebt.db.insertUserPreference.run(ownerId, updated.name, updated.userLimit, updated.bitrate);
 
     for (const overwrite of updated.permissionOverwrites.values()) {
         if (overwrite.id === ownerId && overwrite.type === 'member') continue;
-        db.insertUserPreferencePermissions.run(
+        client.db.insertUserPreferencePermissions.run(
             overwrite.id,
             overwrite.type,
             overwrite.allow.bitfield,

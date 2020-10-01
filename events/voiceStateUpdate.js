@@ -1,13 +1,12 @@
 const { Collection } = require('discord.js');
-const db = require('../utils/db');
 
 const cooldowns = new Collection(); // todo: move to db
 
-module.exports = (oldState, newState) => {
-    const { channel_id: channelId } = db.selectGuildById.get(newState.guild.id) || {};
+module.exports = (client, oldState, newState) => {
+    const { channel_id: channelId } = client.db.selectGuildById.get(newState.guild.id) || {};
     if (channelId === undefined) return;
 
-    if (oldState.channel !== null && db.selectChannelById.get(oldState.channelID) !== undefined) {
+    if (oldState.channel !== null && client.db.selectChannelById.get(oldState.channelID) !== undefined) {
         const channel = oldState.guild.channels.resolve(oldState.channelID);
         if (channel.members.size === 0) {
             channel
@@ -16,7 +15,7 @@ module.exports = (oldState, newState) => {
                     // todo: send message why this failed
                 })
                 .finally(() => {
-                    db.deleteChannel.run(oldState.channelID);
+                    client.db.deleteChannel.run(oldState.channelID);
                 });
         }
     }
@@ -37,7 +36,7 @@ module.exports = (oldState, newState) => {
         return;
     }
 
-    const prefs = db.selectUserPreferences(newState.member.id);
+    const prefs = client.db.selectUserPreferences(newState.member.id);
     newState.guild.channels
         .create(prefs.name || `${newState.member.displayName}'s channel`, {
             type: 'voice',
@@ -47,7 +46,7 @@ module.exports = (oldState, newState) => {
         })
         .then(channel => {
             newState.member.voice.setChannel(channel);
-            db.insertChannel.run(channel.id, newState.member.id);
+            client.db.insertChannel.run(channel.id, newState.member.id);
         })
         .catch(error => {
             // todo: send user a message?
