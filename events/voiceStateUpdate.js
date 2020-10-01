@@ -6,7 +6,7 @@ module.exports = (client, oldState, newState) => {
     const { channel_id: channelId } = client.db.selectGuildById.get(newState.guild.id) || {};
     if (channelId === undefined) return;
 
-    if (oldState.channel !== null && client.db.selectChannelById.get(oldState.channelID) !== undefined) {
+    if (oldState.channel && client.db.selectChannelById.get(oldState.channelID) !== undefined) {
         const channel = oldState.guild.channels.resolve(oldState.channelID);
         if (channel.members.size === 0) {
             channel

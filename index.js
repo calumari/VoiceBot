@@ -16,7 +16,7 @@ readdirSync('./commands')
     .forEach(f => {
         const command = require(`./commands/${f}`);
         client.commands.set(command.usage.name, command);
-        if (command.usage.aliases !== undefined) {
+        if (command.usage.aliases) {
             for (const alias of command.usage.aliases) {
                 client.aliases.set(alias, command);
             }
