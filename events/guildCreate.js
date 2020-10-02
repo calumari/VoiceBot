@@ -1,9 +1,7 @@
 module.exports = (client, guild) => {
-    const { channel_id: channelId } = client.db.selectGuildById.get(guild.id) || {};
-    if (channelId && guild.channels.resolve(channelId)) return;
-
+    const settings = client.db.selectGuildById.get(guild.id);
+    if (settings) return;
     client.db.insertGuild.run(guild.id);
-
     const channel = guild.defaultChannel;
     if (!channel) return; // conditional chaining when?
     channel.send({

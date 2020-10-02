@@ -7,9 +7,8 @@ const db = require('better-sqlite3')(`${dir}/db.sqlite`);
 
 db.prepare(
     `
-    CREATE TABLE IF NOT EXISTS guilds (
+    CREATE TABLE IF NOT EXISTS guild_settings (
         id TEXT PRIMARY KEY,
-        channel_id TEXT,
         prefix TEXT
     );
     `
@@ -17,63 +16,36 @@ db.prepare(
 
 db.prepare(
     `
-    CREATE TABLE IF NOT EXISTS channels (
+    CREATE TABLE IF NOT EXISTS guild_channels (
         id TEXT PRIMARY KEY,
-        owner_id TEXT NOT NULL
+        owner_id TEXT NOT NULL,
+        guild_id TEXT NOT NULL,
+        FOREIGN KEY(guild_id) REFERENCES guild_settings(id)
     );
     `
 ).run();
 
 db.prepare(
     `
-    CREATE TABLE IF NOT EXISTS user_prefs (
+    CREATE TABLE IF NOT EXISTS guild_triggers (
         id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        user_limit INTEGER,
-        bitrate INTEGER
-    );
-    `
-).run();
-
-db.prepare(
-    `
-    CREATE TABLE IF NOT EXISTS user_pref_permissions (
-        id TEXT PRIMARY KEY,
-        type TEXT STRING NOT NULL,
-        allow INTEGER,
-        deny INTEGER,
-        user_id TEXT NOT NULL,
-        FOREIGN KEY(user_id) REFERENCES user_prefs(id)
+        guild_id TEXT NOT NULL,
+        FOREIGN KEY(guild_id) REFERENCES guild_settings(id)
     );
     `
 ).run();
 
 module.exports = {
-    selectGuildById: db.prepare('SELECT channel_id FROM guilds WHERE id=?;'),
-    selectGuildPrefix: db.prepare('SELECT prefix FROM guilds WHERE id=?;'),
-    insertGuild: db.prepare('INSERT INTO guilds (id) VALUES (?)'),
-    updateGuildChannel: db.prepare('UPDATE guilds SET channel_id=? WHERE id=?'),
-    updateGuildPrefix: db.prepare('UPDATE guilds SET prefix=? WHERE id=?'),
+    insertGuild: db.prepare('INSERT INTO guild_settings (id) VALUES (?)'),
+    selectGuildById: db.prepare('SELECT * FROM guild_settings WHERE id=?;'),
 
-    selectChannels: db.prepare('SELECT * FROM channels;'),
-    selectChannelById: db.prepare('SELECT owner_id FROM channels WHERE id=?;'),
-    selectChannelByOwnerId: db.prepare('SELECT id FROM channels WHERE owner_id=?;'),
-    insertChannel: db.prepare('INSERT INTO channels (id, owner_id) VALUES (?, ?);'),
-    deleteChannel: db.prepare('DELETE FROM channels WHERE id=?;'),
-    selectUserPreferences: id => {
-        return {
-            ...db.prepare('SELECT * FROM user_prefs WHERE id=?').get(id),
-            permissionOverwrites: db
-                .prepare('SELECT id, type, allow, deny FROM user_pref_permissions WHERE user_id=?')
-                .all(id),
-        };
-    },
-    insertUserPreference: db.prepare('INSERT INTO user_prefs (id, name, user_limit, bitrate) VALUES (?, ?, ?, ?)'),
-    insertUserPreferencePermissions: db.prepare(
-        'INSERT INTO user_pref_permissions (id, type, allow, deny, user_id) VALUES (?, ?, ?, ?, ?)'
-    ),
-    deleteUserPreferences: id => {
-        db.prepare('DELETE FROM user_pref_permissions WHERE user_id=?;').run(id);
-        db.prepare('DELETE FROM user_prefs WHERE id=?;').run(id);
-    },
+    selectGuildPrefix: db.prepare('SELECT prefix FROM guild_settings WHERE id=?;'),
+    updateGuildPrefix: db.prepare('UPDATE guild_settings SET prefix=? WHERE id=?'),
+
+    insertGuildChannel: db.prepare('INSERT INTO guild_channels (id, owner_id, guild_id) VALUES (?, ?, ?);'),
+    selectGuildChannelsByGuild: db.prepare('SELECT id FROM guild_channels WHERE guild_id=?;'),
+    deleteGuildChannel: db.prepare('DELETE FROM guild_channels WHERE id=?;'),
+
+    insertGuildTrigger: db.prepare('INSERT INTO guild_triggers (id, guild_id) VALUES (?, ?)'),
+    selectGuildTriggersByGuild: db.prepare('SELECT id FROM guild_triggers WHERE guild_id=?'),
 };
