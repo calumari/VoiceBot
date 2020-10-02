@@ -3,10 +3,8 @@ module.exports = (client, guild) => {
     if (settings) return;
 
     client.db.insertGuild.run(guild.id);
-    const channel = guild.defaultChannel;
-
-    if (!channel) return; // conditional chaining when?
-    channel.send({
+    
+    guild.sendAlert({
         embed: {
             title: 'Hey! :wave:',
             description: `Thanks for adding me to your server! To get started, use \`.setup\`.

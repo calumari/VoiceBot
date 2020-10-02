@@ -22,6 +22,13 @@ module.exports = Structures.extend('Guild', Guild => {
                 .first();
         }
 
+        sendAlert(message) {
+            const channel = this.defaultChannel;
+            if (channel) {
+                channel.send(message);
+            }
+        }
+
         addTriggerChannel(channelResolvable) {
             const id = this.channels.resolveID(channelResolvable);
             this.client.db.insertGuildTrigger.run(id, this.id);
