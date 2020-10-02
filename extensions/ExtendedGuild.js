@@ -1,7 +1,7 @@
 const { Structures } = require('discord.js');
 
 module.exports = Structures.extend('Guild', Guild => {
-    class VoiceGuild extends Guild {
+    class ExtendedGuild extends Guild {
         constructor(...args) {
             super(...args);
             this.managed = this.client.db.selectGuildChannelsByGuild.all(this.id).map(result => result.id);
@@ -48,5 +48,5 @@ module.exports = Structures.extend('Guild', Guild => {
         }
     }
 
-    return VoiceGuild;
+    return ExtendedGuild;
 });

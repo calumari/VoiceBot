@@ -1,6 +1,6 @@
 module.exports = async (client, oldState, newState) => {
     try {
-        if (oldState.channelID && oldState.guild.managed.includes(oldState.channelID)) {
+        if (oldState.channel && oldState.guild.managed.includes(oldState.channel.id) && oldState.channel.isEmpty(client.config.ignoreBots)) {
             if (!oldState.guild.me.hasPermission('MANAGE_CHANNELS')) {
                 return oldState.guild.sendAlert({
                     embed: {
@@ -10,14 +10,11 @@ module.exports = async (client, oldState, newState) => {
                 });
             }
 
-            const channel = oldState.guild.channels.resolve(oldState.channelID);
-            if (channel.members.size === 0) {
-                await channel.delete();
-                oldState.guild.removeManagedChannel(oldState.channelID);
-            }
+            await oldState.channel.delete();
+            oldState.guild.removeManagedChannel(oldState.channelID);
         }
 
-        if (newState.channelID && newState.guild.triggers.includes(newState.channelID)) {
+        if (newState.channel && newState.guild.triggers.includes(newState.channel.id)) {
             if (!newState.guild.me.hasPermission(['MANAGE_CHANNELS', 'MOVE_MEMBERS'])) {
                 return newState.guild.sendAlert({
                     embed: {
