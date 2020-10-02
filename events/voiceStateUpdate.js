@@ -1,15 +1,10 @@
-const { Collection } = require('discord.js');
-const message = require('./message');
-
-const cooldowns = new Collection(); // todo: move to db
-
 module.exports = (client, oldState, newState) => {
     if (oldState.channelID && oldState.guild.managed.includes(oldState.channelID)) {
         const channel = oldState.guild.channels.resolve(oldState.channelID);
         if (channel.members.size === 0) {
             channel
                 .delete()
-                .catch(error => {
+                .catch(err => {
                     // todo: send message why this failed
                 })
                 .finally(() => {
@@ -31,7 +26,6 @@ module.exports = (client, oldState, newState) => {
             newState.member.voice.setChannel(channel);
         })
         .catch(err => {
-            console.log(err);
             // todo: send user a message?
         })
         .finally(() => {
