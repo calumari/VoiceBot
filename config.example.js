@@ -9,7 +9,7 @@ module.exports = {
 
     categoryName: 'VoiceBoy',
 
-    channelName: 'Join to Create',
+    channelName: 'Join To Create',
 
-    channelNameSimilar: count => `Join to Create ${count}`,
+    channelNameSimilar: count => `Join To Create ${count}`,
 };
