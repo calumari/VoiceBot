@@ -1,5 +1,3 @@
-const db = require('../utils/db');
-
 exports.run = (client, message, args) => {
     const oldPrefix = client.db.selectGuildPrefix.pluck().get(message.guild.id);
     const prefix = args[0];
