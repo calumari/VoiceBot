@@ -35,6 +35,12 @@ module.exports = Structures.extend('Guild', Guild => {
             this.triggers.push(id);
         }
 
+        removeTriggerChannel(channelResolvable) {
+            const id = this.channels.resolveID(channelResolvable);
+            this.client.db.deleteGuildTrigger.run(id);
+            this.triggers.splice(this.triggers.indexOf(id), 1);
+        }
+
         addManagedChannel(channelResolvable, userResolvable) {
             const id = this.channels.resolveID(channelResolvable);
             this.client.db.insertGuildChannel.run(id, this.client.users.resolveID(userResolvable), this.id);

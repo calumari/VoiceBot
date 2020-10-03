@@ -1,9 +1,12 @@
 module.exports = (client, guild) => {
-    const settings = client.db.selectGuildById.get(guild.id);
-    if (settings) return;
-
     client.db.insertGuild.run(guild.id);
-    
+    for (const channel of guild.managed) {
+        if (!guild.channels.resolve(channel)) guild.removeManagedChannel(channel);
+    }
+    for (const channel of guild.triggers) {
+        if (!guild.channels.resolve(channel)) guild.removeTriggerChannel(channel);
+    }
+
     guild.sendAlert({
         embed: {
             title: 'Hey! :wave:',
