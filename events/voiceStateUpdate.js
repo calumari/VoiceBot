@@ -1,6 +1,10 @@
 module.exports = async (client, oldState, newState) => {
     try {
-        if (oldState.channel && oldState.guild.managed.includes(oldState.channel.id) && oldState.channel.isEmpty(client.config.ignoreBots)) {
+        if (
+            oldState.channel &&
+            oldState.guild.managed.includes(oldState.channel.id) &&
+            oldState.channel.isEmpty(client.config.ignoreBots)
+        ) {
             if (!oldState.guild.me.hasPermission('MANAGE_CHANNELS')) {
                 return oldState.guild.sendAlert({
                     embed: {
@@ -28,7 +32,7 @@ module.exports = async (client, oldState, newState) => {
                 type: 'voice',
                 userLimit: newState.channel.userLimit,
                 parent: newState.channel.parentID,
-                permissionOverwrites: [{ id: newState.member.id, allow: ['VIEW_CHANNEL', 'SPEAK'] }],
+                permissionOverwrites: [{ id: newState.member.id, allow: ['VIEW_CHANNEL', 'SPEAK', 'MANAGE_CHANNELS'] }],
             });
             newState.guild.addManagedChannel(channel, newState.member);
             newState.member.voice.setChannel(channel);
