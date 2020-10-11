@@ -12,4 +12,6 @@ module.exports = {
     channelName: 'Join To Create',
 
     channelNameSimilar: count => `Join To Create ${count}`,
+
+    invite: 'Fill me!'
 };
