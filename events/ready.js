@@ -1,4 +1,4 @@
-module.exports = async client => {
+module.exports = client => {
     for (const guild of client.guilds.cache.values()) {
         client.db.insertGuild.run(guild.id);
         for (const channel of guild.managed) {
@@ -8,4 +8,6 @@ module.exports = async client => {
             if (!guild.channels.resolve(channel)) guild.removeTriggerChannel(channel);
         }
     }
+    
+    client.user.setPresence({ activity: { name: '.invite' } });
 };
