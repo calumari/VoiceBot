@@ -1,5 +1,4 @@
 exports.run = (client, message, args) => {
-    const oldPrefix = client.db.selectGuildPrefix.pluck().get(message.guild.id);
     const prefix = args[0];
     if (!prefix) return;
     else if (prefix.length > 1) return;
