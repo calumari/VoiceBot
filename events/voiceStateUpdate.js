@@ -1,5 +1,5 @@
 async function handleLeave({ channel, guild }) {
-    if (!guild.managed.includes(channel.id) || !channel.isEmpty(channel.client.config.ignoreBots)) return;
+    if (!guild.isManagedChannel(channel.id) || !channel.isEmpty(channel.client.config.ignoreBots)) return;
     if (!guild.me.hasPermission('MANAGE_CHANNELS')) {
         return guild.sendAlert({
             embed: {
@@ -14,7 +14,7 @@ async function handleLeave({ channel, guild }) {
 }
 
 async function handleJoin({ channel, guild, member }) {
-    if (!guild.triggers.includes(channel.id)) return;
+    if (!guild.isTriggerChannel(channel.id)) return;
     if (!guild.me.hasPermission(['MANAGE_CHANNELS', 'MOVE_MEMBERS'])) {
         return guild.sendAlert({
             embed: {
@@ -24,10 +24,13 @@ async function handleJoin({ channel, guild, member }) {
         });
     }
 
-    const managed = await guild.channels.create(`${member.displayName}'s channel`, {
+    const prefs = channel.client.db.selectUserPreferences.get(member.id) || {};
+
+    const managed = await guild.channels.create(prefs.name || `${member.displayName}'s channel`, {
         type: 'voice',
-        userLimit: channel.userLimit,
+        userLimit: channel.userLimit > 0 ? channel.userLimit : prefs['user_limit'], // todo: make configurable?
         parent: channel.parentID,
+        bitrate: prefs.bitrate,
         permissionOverwrites: [{ id: member.id, allow: ['VIEW_CHANNEL', 'SPEAK', 'MANAGE_CHANNELS'] }],
     });
     guild.addManagedChannel(managed, member);

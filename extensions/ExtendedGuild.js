@@ -4,7 +4,7 @@ module.exports = Structures.extend('Guild', Guild => {
     class ExtendedGuild extends Guild {
         constructor(...args) {
             super(...args);
-            this.managed = this.client.db.selectGuildChannelsByGuild.all(this.id).map(result => result.id);
+            this.managed = this.client.db.selectGuildChannelsByGuild.all(this.id).reduce((obj, item) => Object.assign(obj, { [item.id]: item['owner_id'] }), {});
             this.triggers = this.client.db.selectGuildTriggersByGuild.all(this.id).map(result => result.id);
         }
 
@@ -43,14 +43,27 @@ module.exports = Structures.extend('Guild', Guild => {
 
         addManagedChannel(channelResolvable, userResolvable) {
             const id = this.channels.resolveID(channelResolvable);
-            this.client.db.insertGuildChannel.run(id, this.client.users.resolveID(userResolvable), this.id);
-            this.managed.push(id);
+            const userId = this.client.users.resolveID(userResolvable);
+            this.client.db.insertGuildChannel.run(id, userId, this.id);
+            this.managed[id] = userId;
         }
 
         removeManagedChannel(channelResolvable) {
             const id = this.channels.resolveID(channelResolvable);
             this.client.db.deleteGuildChannel.run(id);
-            this.managed.splice(this.managed.indexOf(id), 1);
+            delete this.managed[id];
+        }
+
+        isManagedChannel(channelResolvable) {
+            return this.channels.resolveID(channelResolvable) in this.managed;
+        }
+
+        getManagedChannelOwnerId(channelResolvable) {
+            return this.managed[this.channels.resolveID(channelResolvable)];
+        }
+
+        isTriggerChannel(channelResolvable) {
+            return this.triggers.includes(this.channels.resolveID(channelResolvable));
         }
     }
 

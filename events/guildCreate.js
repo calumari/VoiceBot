@@ -1,6 +1,6 @@
 module.exports = (client, guild) => {
     client.db.insertGuild.run(guild.id);
-    for (const channel of guild.managed) {
+    for (const channel of Object.keys(guild.managed)) {
         if (!guild.channels.resolve(channel)) guild.removeManagedChannel(channel);
     }
     for (const channel of guild.triggers) {
