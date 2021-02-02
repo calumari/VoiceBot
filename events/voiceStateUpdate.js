@@ -31,9 +31,8 @@ async function handleJoin({ channel, guild, member }) {
         userLimit: channel.userLimit > 0 ? channel.userLimit : prefs['user_limit'], // todo: make configurable?
         parent: channel.parentID,
         bitrate: prefs.bitrate,
-        permissionOverwrites: [{ id: member.id, allow: ['VIEW_CHANNEL', 'SPEAK', 'MANAGE_CHANNELS'] }],
     });
-    managed.lockPermissions();
+    managed.lockPermissions().then(guild => guild.overwritePermissions(['VIEW_CHANNEL', 'SPEAK', 'MANAGE_CHANNELS']));
 
     guild.addManagedChannel(managed, member);
     member.voice.setChannel(managed);
