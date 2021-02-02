@@ -33,6 +33,8 @@ async function handleJoin({ channel, guild, member }) {
         bitrate: prefs.bitrate,
         permissionOverwrites: [{ id: member.id, allow: ['VIEW_CHANNEL', 'SPEAK', 'MANAGE_CHANNELS'] }],
     });
+    managed.lockPermissions();
+
     guild.addManagedChannel(managed, member);
     member.voice.setChannel(managed);
 }
