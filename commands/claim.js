@@ -24,6 +24,7 @@ exports.run = (client, message, args) => {
     }
 
     const preferences = client.db.selectChannelPreferences(message.member.id, channel.id) || {};
+    message.guild.transferManagedChannel(channel.id, message.member.id)
 
     channel
         .edit({
@@ -41,12 +42,8 @@ exports.run = (client, message, args) => {
                     ...resolvePermissionOverwrites(permission.deny, true)
                 })
             })
-            return ch
         })
-        .then(ch => {
-            message.guild.transferManagedChannel(ch, message.member.id)
-            message.react('👌')
-        })
+        .then(message.react('👌'))
 };
 
 exports.usage = {
