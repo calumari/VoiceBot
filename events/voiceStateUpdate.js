@@ -1,3 +1,5 @@
+const { Permissions } = require("discord.js");
+
 async function handleLeave({ channel, guild }) {
     if (!guild.isManagedChannel(channel.id) || !channel.isEmpty(channel.client.config.ignoreBots)) return;
     if (!guild.me.hasPermission('MANAGE_CHANNELS')) {
@@ -23,19 +25,39 @@ async function handleJoin({ channel, guild, member }) {
             },
         });
     }
+    if (!channel.parent) {
+        return guild.sendAlert({
+            embed: {
+                title: 'Oh dear...',
+                description: `I ran into a little trouble while creating a voice channel for <@${member.id}>. Please ensure that **${channel.name}** is under a category!`,
+            },
+        });
+    }
 
-    const prefs = channel.client.db.selectUserPreferences.get(member.id) || {};
+    const preferences = channel.client.db.selectChannelPreferences(member.id, channel.parentID) || {};
 
-    const managed = await guild.channels.create(prefs.name || `${member.displayName}'s channel`, {
-        type: 'voice',
-        userLimit: channel.userLimit > 0 ? channel.userLimit : prefs['user_limit'], // todo: make configurable?
-        parent: channel.parentID,
-        bitrate: prefs.bitrate,
-    });
-    managed.lockPermissions().then(guild => guild.createOverwrite(member.id, {'VIEW_CHANNEL': true, 'SPEAK': true, 'MANAGE_CHANNELS': true }));
-
-    guild.addManagedChannel(managed, member);
-    member.voice.setChannel(managed);
+    guild.channels
+        .create(preferences.name || `${member.displayName}'s channel`, {
+            type: 'voice',
+            userLimit: channel.userLimit > 0 ? channel.userLimit : preferences['user_limit'],
+            parent: channel.parentID,
+            bitrate: preferences.bitrate,
+        })
+        .then(ch => ch.lockPermissions())
+        .then(ch => ch.createOverwrite(member.id, { 'VIEW_CHANNEL': true, 'SPEAK': true, 'MANAGE_CHANNELS': true }))
+        .then(ch => {
+            preferences.permissions.forEach(permission => {
+                ch.createOverwrite(permission['user_or_role_id'], {
+                    ...resolvePermissionOverwrites(permission.allow, false),
+                    ...resolvePermissionOverwrites(permission.deny, true)
+                })
+            })
+            return ch
+        })
+        .then(ch => {
+            guild.addManagedChannel(ch, member);
+            member.voice.setChannel(ch);
+        });
 }
 
 module.exports = (client, oldState, newState) => {
@@ -47,3 +69,15 @@ module.exports = (client, oldState, newState) => {
         console.log(err);
     }
 };
+
+function resolvePermissionOverwrites(bitfield, invert = false) {
+    const permissionOverwrites = {}
+    const permissions = new Permissions(bitfield)
+    for (const flag in Permissions.FLAGS) {
+        if (permissions.has(flag, false)) {
+            permissionOverwrites[flag] = !invert
+        }
+    }
+    return permissionOverwrites
+}
+

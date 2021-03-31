@@ -4,7 +4,7 @@ module.exports = Structures.extend('Guild', Guild => {
     class ExtendedGuild extends Guild {
         constructor(...args) {
             super(...args);
-            this.managed = this.client.db.selectGuildChannelsByGuild.all(this.id).reduce((obj, item) => Object.assign(obj, { [item.id]: item['owner_id'] }), {});
+            this.managed = this.client.db.selectGuildChannelsByGuild.all(this.id).reduce((obj, item) => Object.assign(obj, { [item.id]: item['user_id'] }), {});
             this.triggers = this.client.db.selectGuildTriggersByGuild.all(this.id).map(result => result.id);
         }
 
@@ -52,6 +52,13 @@ module.exports = Structures.extend('Guild', Guild => {
             const id = this.channels.resolveID(channelResolvable);
             this.client.db.deleteGuildChannel.run(id);
             delete this.managed[id];
+        }
+
+        transferManagedChannel(channelResolvable, userResolvable) {
+            const id = this.channels.resolveID(channelResolvable);
+            const userId = this.client.users.resolveID(userResolvable);
+            this.client.db.transferGuildChannel.run(userId, id, this.id);
+            this.managed[id] = userId;
         }
 
         isManagedChannel(channelResolvable) {

@@ -6,6 +6,6 @@ module.exports = Structures.extend('VoiceChannel', VoiceChannel => {
             return ignoreBots ? this.members.every(member => member.user.bot) : this.members.size === 0;
         }
     }
-    
+
     return ExtendedVoiceChannel;
 });
