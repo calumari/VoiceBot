@@ -1,7 +1,10 @@
 module.exports = client => {
-    client.user.setPresence({ activity: { name: client.config.presence } });
-
-    if (client.config.motd) {
-        client.guilds.cache.forEach(guild => guild.sendAlert(client.config.motd))
+    for (const guild of client.guilds.cache.values()) {
+        client.db.insertGuild.run(guild.id)
+        if (client.config.motd) {
+            guild.sendAlert(client.config.motd)
+        }
     }
+
+    client.user.setPresence({ activity: { name: client.config.presence } });
 };
