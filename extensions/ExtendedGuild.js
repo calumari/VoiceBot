@@ -57,7 +57,7 @@ module.exports = Structures.extend('Guild', Guild => {
         transferManagedChannel(channelResolvable, userResolvable) {
             const id = this.channels.resolveID(channelResolvable);
             const userId = this.client.users.resolveID(userResolvable);
-            this.client.db.transferGuildChannel.run(userId, id, this.id);
+            this.client.db.transferGuildChannel.run(userId, id);
             this.managed[id] = userId;
         }
 
