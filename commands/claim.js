@@ -43,7 +43,10 @@ exports.run = (client, message, args) => {
             })
             return ch
         })
-        .then(message.react('👌'))
+        .then(ch => {
+            message.guild.transferManagedChannel(ch, message.member.id)
+            message.react('👌')
+        })
 };
 
 exports.usage = {
