@@ -1,3 +1,5 @@
+const { resolvePermissionOverwrites } = require('../util/utils');
+
 exports.run = (client, message, args) => {
     const voicestate = message.member.voice
     if (!voicestate.channelID) {

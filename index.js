@@ -7,7 +7,7 @@ require('./extensions/ExtendedVoiceChannel');
 const client = new Discord.Client(); // todo: move to own class
 
 client.config = require('./config');
-client.db = require('./utils/db');
+client.db = require('./util/db');
 
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();

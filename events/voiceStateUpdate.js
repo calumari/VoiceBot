@@ -1,4 +1,4 @@
-const { Permissions } = require("discord.js");
+const { resolvePermissionOverwrites } = require('../util/utils');
 
 async function handleLeave({ channel, guild }) {
     if (!guild.isManagedChannel(channel.id) || !channel.isEmpty(channel.client.config.ignoreBots)) return;
@@ -69,15 +69,3 @@ module.exports = (client, oldState, newState) => {
         console.log(err);
     }
 };
-
-function resolvePermissionOverwrites(bitfield, invert = false) {
-    const permissionOverwrites = {}
-    const permissions = new Permissions(bitfield)
-    for (const flag in Permissions.FLAGS) {
-        if (permissions.has(flag, false)) {
-            permissionOverwrites[flag] = !invert
-        }
-    }
-    return permissionOverwrites
-}
-
