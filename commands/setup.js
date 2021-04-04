@@ -1,12 +1,12 @@
-const { Permissions } = require('discord.js');
+const { Permissions, Constants } = require('discord.js');
 
 exports.run = async (client, message, args) => {
     try {
         let parent = message.guild.channels.cache.find(
-            c => c.name === client.config.categoryName && c.type === 'category'
+            c => c.name === client.config.categoryName && c.type === Constants.ChannelTypes.CATEGORY
         );
         if (!parent) {
-            parent = await message.guild.channels.create(client.config.categoryName, { type: 'category' });
+            parent = await message.guild.channels.create(client.config.categoryName, { type: Constants.ChannelTypes.CATEGORY });
         }
 
         const count = parent.children.filter(c => c.name.startsWith(client.config.channelName)).size;
