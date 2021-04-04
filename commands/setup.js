@@ -1,13 +1,13 @@
-const { Permissions, Constants } = require('discord.js');
+const { Permissions } = require('discord.js');
 
 exports.run = async (client, message, args) => {
     try {
         let parent = message.guild.channels.cache.find(
-            c => c.name === client.config.categoryName && c.type === Constants.ChannelTypes.CATEGORY
+            c => c.name === client.config.categoryName && c.type === 'category'
         );
         if (!parent) {
             parent = await message.guild.channels.create(client.config.categoryName, {
-                type: Constants.ChannelTypes.CATEGORY,
+                type: 'category',
             });
         }
 
@@ -15,7 +15,7 @@ exports.run = async (client, message, args) => {
         const name = count > 0 ? client.config.channelNameSimilar(count) : client.config.channelName;
 
         const channel = await message.guild.channels.create(name, {
-            type: Constants.ChannelTypes.VOICE,
+            type: 'voice',
             parent: parent.id,
         });
         message.guild.addTriggerChannel(channel);

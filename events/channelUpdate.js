@@ -13,7 +13,7 @@ module.exports = (client, old, updated) => {
     }
 
     client.db.insertChannelPreferences.run(ownerId, updated.parentID, updated.name, updated.userLimit, updated.bitrate);
-    client.db.deleteChannelPreferencePermissions.run(ownerId, updated.parentID)
+    client.db.deleteChannelPreferencePermissions.run(ownerId, updated.parentID);
 
     for (const overwrite of updated.permissionOverwrites.values()) {
         if (updated.parent.permissionOverwrites.find(ow => ow.id === overwrite.id)) continue;
@@ -23,6 +23,6 @@ module.exports = (client, old, updated) => {
             overwrite.id,
             overwrite.allow.bitfield,
             overwrite.deny.bitfield
-        )
+        );
     }
 };

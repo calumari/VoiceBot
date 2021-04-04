@@ -21,7 +21,7 @@ module.exports = {
 
     motd: null,
 
-    helpCommand: (pjson) => ({
+    helpCommand: pjson => ({
         embed: {
             title: '**VoiceBoy**',
             url: `${pjson.homepage}`,
@@ -44,7 +44,6 @@ module.exports = {
     }),
 
     voiceRole: {
-
         cronTime: '* */1 * * *',
 
         softThreshold: 600000,

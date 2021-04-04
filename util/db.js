@@ -16,7 +16,7 @@ db.prepare(
 ).run();
 try {
     db.prepare('ALTER TABLE guild_preferences ADD COLUMN voice_role_id TEXT;').run();
-} catch (ignored) { } // TODO: migrations
+} catch (ignored) {} // TODO: migrations
 
 db.prepare(
     `
@@ -50,7 +50,9 @@ db.prepare(
     );
     `
 ).run();
-db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_channel_preferences_user_parent ON channel_preferences(user_id, parent_id);`).run()
+db.prepare(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_channel_preferences_user_parent ON channel_preferences(user_id, parent_id);`
+).run();
 
 db.prepare(
     `
@@ -63,7 +65,9 @@ db.prepare(
     );
     `
 ).run();
-db.prepare(`CREATE UNIQUE INDEX IF NOT EXISTS idx_channel_permissions_user_parent ON channel_permissions(user_id, parent_id, user_or_role_id);`).run()
+db.prepare(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_channel_permissions_user_parent ON channel_permissions(user_id, parent_id, user_or_role_id);`
+).run();
 
 db.prepare(
     `CREATE TABLE IF NOT EXISTS guild_user (
@@ -73,7 +77,7 @@ db.prepare(
         PRIMARY KEY(id, guild_id)
     );
     `
-).run()
+).run();
 
 module.exports = {
     insertGuild: db.prepare('INSERT OR IGNORE INTO guild_preferences (id) VALUES (?);'),
@@ -93,11 +97,19 @@ module.exports = {
     selectChannelPreferences: (userId, parentId) => {
         return {
             ...db.prepare('SELECT * FROM channel_preferences WHERE user_id=? AND parent_id=?;').get(userId, parentId),
-            permissions: db.prepare('SELECT user_or_role_id, allow, deny FROM channel_permissions WHERE user_id=? AND parent_id=?;').all(userId, parentId),
-        }
+            permissions: db
+                .prepare(
+                    'SELECT user_or_role_id, allow, deny FROM channel_permissions WHERE user_id=? AND parent_id=?;'
+                )
+                .all(userId, parentId),
+        };
     },
-    insertChannelPreferences: db.prepare('INSERT OR REPLACE INTO channel_preferences (user_id, parent_id, name, user_limit, bitrate) VALUES (?, ?, ?, ?, ?);'),
-    insertChannelPreferencePermissions: db.prepare('INSERT INTO channel_permissions (user_id, parent_id, user_or_role_id, allow, deny) VALUES (?, ?, ?, ?, ?);'),
+    insertChannelPreferences: db.prepare(
+        'INSERT OR REPLACE INTO channel_preferences (user_id, parent_id, name, user_limit, bitrate) VALUES (?, ?, ?, ?, ?);'
+    ),
+    insertChannelPreferencePermissions: db.prepare(
+        'INSERT INTO channel_permissions (user_id, parent_id, user_or_role_id, allow, deny) VALUES (?, ?, ?, ?, ?);'
+    ),
     deleteChannelPreferencePermissions: db.prepare('DELETE FROM channel_permissions WHERE user_id=? AND parent_id=?;'),
 
     getUser: db.prepare('SELECT * FROM guild_user WHERE id=? AND guild_id=?;'),

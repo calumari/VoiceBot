@@ -4,8 +4,10 @@ module.exports = Structures.extend('Guild', Guild => {
     class ExtendedGuild extends Guild {
         constructor(...args) {
             super(...args);
-            this.preferences = this.client.db.selectGuildById.get(this.id)
-            this.managed = this.client.db.selectGuildChannelsByGuild.all(this.id).reduce((obj, item) => Object.assign(obj, { [item.id]: item['user_id'] }), {});
+            this.preferences = this.client.db.selectGuildById.get(this.id);
+            this.managed = this.client.db.selectGuildChannelsByGuild
+                .all(this.id)
+                .reduce((obj, item) => Object.assign(obj, { [item.id]: item['user_id'] }), {});
             this.triggers = this.client.db.selectGuildTriggersByGuild.all(this.id).map(result => result.id);
         }
 
@@ -33,11 +35,11 @@ module.exports = Structures.extend('Guild', Guild => {
         }
 
         get voiceRoleId() {
-            return this.preferences['voice_role_id']
+            return this.preferences['voice_role_id'];
         }
 
         set voiceRoleId(roleId) {
-            this.preferences['voice_role_id'] = roleId
+            this.preferences['voice_role_id'] = roleId;
             this.client.db.updateVoiceRoleId.run(roleId, this.id);
         }
 
