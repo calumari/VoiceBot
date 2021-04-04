@@ -20,7 +20,7 @@ exports.run = (client, message, args) => {
         );
     }
 
-    const role = message.guild.roles.cache.find(r => r.id == roleIdOrName || r.name === roleIdOrName);
+    const role = message.guild.roles.cache.find(r => r.id == roleIdOrName || r.name.toLowerCase() === roleIdOrName.toLowerCase());
     if (!role) {
         return message.reply(`no role exists by that ID or name.`);
     }
