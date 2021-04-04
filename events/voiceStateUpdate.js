@@ -1,4 +1,4 @@
-const { Permissions } = require('discord.js');
+const { Permissions, Constants } = require('discord.js');
 const { resolvePermissionOverwrites } = require('../util/utils');
 
 async function deleteManagedChannel({ channel, guild }) {
@@ -39,7 +39,7 @@ async function createManagedChannel({ channel, guild, member }) {
 
     guild.channels
         .create(preferences.name || `${member.displayName}'s channel`, {
-            type: 'voice',
+            type: Constants.ChannelTypes.VOICE,
             userLimit: channel.userLimit > 0 ? channel.userLimit : preferences['user_limit'],
             parent: channel.parentID,
             bitrate: preferences.bitrate,

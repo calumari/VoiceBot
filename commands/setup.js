@@ -6,13 +6,18 @@ exports.run = async (client, message, args) => {
             c => c.name === client.config.categoryName && c.type === Constants.ChannelTypes.CATEGORY
         );
         if (!parent) {
-            parent = await message.guild.channels.create(client.config.categoryName, { type: Constants.ChannelTypes.CATEGORY });
+            parent = await message.guild.channels.create(client.config.categoryName, {
+                type: Constants.ChannelTypes.CATEGORY,
+            });
         }
 
         const count = parent.children.filter(c => c.name.startsWith(client.config.channelName)).size;
         const name = count > 0 ? client.config.channelNameSimilar(count) : client.config.channelName;
 
-        const channel = await message.guild.channels.create(name, { type: 'voice', parent: parent.id });
+        const channel = await message.guild.channels.create(name, {
+            type: Constants.ChannelTypes.VOICE,
+            parent: parent.id,
+        });
         message.guild.addTriggerChannel(channel);
 
         message.channel.send({

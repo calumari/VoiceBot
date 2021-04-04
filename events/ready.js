@@ -2,14 +2,14 @@ const { CronJob } = require('cron');
 
 module.exports = async (client) => {
     for (const guild of client.guilds.cache.values()) {
-        client.db.insertGuild.run(guild.id)
+        client.db.insertGuild.run(guild.id);
         if (client.config.motd) {
-            guild.sendAlert(client.config.motd)
+            guild.sendAlert(client.config.motd);
         }
     }
 
     client.user.setPresence({ activity: { name: client.config.presence } });
-    
+
     new CronJob(client.config.voiceRole.cronTime, function () {
         for (const guild of client.guilds.cache.values()) {
             if (!guild.hasVoiceRole()) continue;
