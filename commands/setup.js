@@ -1,3 +1,5 @@
+const { Permissions } = require('discord.js');
+
 exports.run = async (client, message, args) => {
     try {
         let parent = message.guild.channels.cache.find(
@@ -26,6 +28,6 @@ exports.run = async (client, message, args) => {
 
 exports.usage = {
     name: 'setup',
-    userPermissions: ['ADMINISTRATOR'],
-    clientPermissions: ['MANAGE_CHANNELS'],
+    userPermissions: [Permissions.FLAGS.ADMINISTRATOR],
+    clientPermissions: [Permissions.FLAGS.MANAGE_CHANNELS],
 };

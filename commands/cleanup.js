@@ -1,6 +1,8 @@
+const { Permissions, Constants } = require('discord.js')
+
 exports.run = (client, message, args) => {
     const parent = message.guild.channels.cache.find(
-        c => c.name === client.config.categoryName && c.type === 'category'
+        c => c.name === client.config.categoryName && c.type === Constants.ChannelTypes.CATEGORY
     );
     if (!parent) return;
     for (const [, channel] of parent.children) {
@@ -10,5 +12,5 @@ exports.run = (client, message, args) => {
 
 exports.usage = {
     name: 'cleanup',
-    userPermissions: ['ADMINISTRATOR'],
+    userPermissions: [Permissions.FLAGS.ADMINISTRATOR],
 };

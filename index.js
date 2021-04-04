@@ -2,9 +2,14 @@ const Discord = require('discord.js');
 const { readdirSync } = require('fs');
 
 require('./extensions/ExtendedGuild');
+require('./extensions/ExtendedGuildMember');
 require('./extensions/ExtendedVoiceChannel');
 
-const client = new Discord.Client(); // todo: move to own class
+const intents = new Discord.Intents();
+intents.add(Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.NON_PRIVILEGED);
+
+const client = new Discord.Client({ fetchAllMembers: true, ws: { intents: intents } }); // todo: move to own class
+// const client = new Discord.Client({ ws: { intents: intents } }); // todo: move to own class
 
 client.config = require('./config');
 client.db = require('./util/db');

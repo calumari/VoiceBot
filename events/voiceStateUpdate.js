@@ -1,8 +1,9 @@
+const { Permissions } = require('discord.js');
 const { resolvePermissionOverwrites } = require('../util/utils');
 
-async function handleLeave({ channel, guild }) {
+async function deleteManagedChannel({ channel, guild }) {
     if (!guild.isManagedChannel(channel.id) || !channel.isEmpty(channel.client.config.ignoreBots)) return;
-    if (!guild.me.hasPermission('MANAGE_CHANNELS')) {
+    if (!guild.me.hasPermission(Permissions.FLAGS.MANAGE_CHANNELS)) {
         return guild.sendAlert({
             embed: {
                 title: 'Oh dear...',
@@ -15,9 +16,9 @@ async function handleLeave({ channel, guild }) {
     guild.removeManagedChannel(channel.id);
 }
 
-async function handleJoin({ channel, guild, member }) {
+async function createManagedChannel({ channel, guild, member }) {
     if (!guild.isTriggerChannel(channel.id)) return;
-    if (!guild.me.hasPermission(['MANAGE_CHANNELS', 'MOVE_MEMBERS'])) {
+    if (!guild.me.hasPermission([Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MOVE_MEMBERS])) {
         return guild.sendAlert({
             embed: {
                 title: 'Oh dear...',
@@ -44,15 +45,15 @@ async function handleJoin({ channel, guild, member }) {
             bitrate: preferences.bitrate,
         })
         .then(ch => ch.lockPermissions())
-        .then(ch => ch.createOverwrite(member.id, { 'VIEW_CHANNEL': true, 'SPEAK': true, 'MANAGE_CHANNELS': true }))
+        .then(ch => ch.createOverwrite(member.id, { VIEW_CHANNEL: true, SPEAK: true, MANAGE_CHANNELS: true }))
         .then(ch => {
             preferences.permissions.forEach(permission => {
                 ch.createOverwrite(permission['user_or_role_id'], {
                     ...resolvePermissionOverwrites(permission.allow, false),
-                    ...resolvePermissionOverwrites(permission.deny, true)
-                })
-            })
-            return ch
+                    ...resolvePermissionOverwrites(permission.deny, true),
+                });
+            });
+            return ch;
         })
         .then(ch => {
             guild.addManagedChannel(ch, member);
@@ -60,12 +61,33 @@ async function handleJoin({ channel, guild, member }) {
         });
 }
 
+async function removeVoiceRole({ channel, guild, member }) {
+    if (!member.hasVoiceRole()) return;
+
+    const user = channel.client.db.getUser.get(member.id, guild.id);
+    if (user && Date.now() - user['last_seen'] > guild.client.config.voiceRole.softThreshold) return;
+    member.roles.remove(guild.voiceRoleId);
+}
+
+async function giveVoiceRole({ guild, member }) {
+    guild.client.db.replaceUser.run(member.id, guild.id, Date.now());
+    if (member.hasVoiceRole()) return;
+    member.roles.add(guild.voiceRoleId);
+}
+
 module.exports = (client, oldState, newState) => {
     try {
-        if (oldState.channelID) handleLeave(oldState);
-        if (newState.channelID) handleJoin(newState);
+        if (oldState.channelID) {
+            deleteManagedChannel(oldState);
+            if (!newState.channelID) {
+                removeVoiceRole(oldState);
+            }
+        }
+        if (newState.channelID) {
+            createManagedChannel(newState);
+            giveVoiceRole(newState);
+        }
     } catch (err) {
-        // todo: explain what happened to user/owner
-        console.log(err);
+        console.error(err); // todo: explain what happened to user/owner
     }
 };
