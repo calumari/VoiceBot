@@ -42,7 +42,6 @@ module.exports = Structures.extend('Guild', Guild => {
         }
 
         hasVoiceRole() {
-            console.log(this.voiceRoleId !== null, this.roles.cache.some(r => r.id === this.voiceRoleId))
             return this.voiceRoleId !== null && this.roles.cache.some(r => r.id === this.voiceRoleId);
         }
 

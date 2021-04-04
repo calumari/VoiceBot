@@ -1,12 +1,12 @@
 const { resolvePermissionOverwrites } = require('../util/utils');
 
 exports.run = (client, message, args) => {
-    const voicestate = message.member.voice
+    const voicestate = message.member.voice;
     if (!voicestate.channelID) {
-        return message.reply("you're not in a voice channel!")
+        return message.reply(`you're not in a voice channel!`);
     }
 
-    const channel = voicestate.channel
+    const channel = voicestate.channel;
     if (!channel.parent) {
         return guild.sendAlert({
             embed: {
@@ -18,15 +18,17 @@ exports.run = (client, message, args) => {
 
     const ownerId = message.guild.getManagedChannelOwnerId(channel.id);
     if (!ownerId) {
-        return message.reply("you're not in a managed voice channel!")
+        return message.reply(`you're not in a managed voice channel!`);
     } else if (ownerId == message.member.id) {
-        return message.reply("you already own that channel!")
+        return message.reply('you already own that channel!');
     } else if (channel.members.find(member => member.id === ownerId)) {
-        return message.reply(`I think <@${ownerId}> might disagree with that. Maybe wait until they leave before claiming their channel?`)
+        return message.reply(
+            `I think <@${ownerId}> might disagree with that. Maybe wait until they leave before claiming their channel?`
+        );
     }
 
     const preferences = client.db.selectChannelPreferences(message.member.id, channel.id) || {};
-    message.guild.transferManagedChannel(channel.id, message.member.id)
+    message.guild.transferManagedChannel(channel.id, message.member.id);
 
     channel
         .edit({
@@ -36,16 +38,16 @@ exports.run = (client, message, args) => {
             bitrate: preferences.bitrate,
         })
         .then(ch => ch.lockPermissions())
-        .then(ch => ch.createOverwrite(message.member.id, { 'VIEW_CHANNEL': true, 'SPEAK': true, 'MANAGE_CHANNELS': true }))
+        .then(ch => ch.createOverwrite(message.member.id, { VIEW_CHANNEL: true, SPEAK: true, MANAGE_CHANNELS: true }))
         .then(ch => {
             preferences.permissions.forEach(permission => {
                 ch.createOverwrite(permission['user_or_role_id'], {
                     ...resolvePermissionOverwrites(permission.allow, false),
-                    ...resolvePermissionOverwrites(permission.deny, true)
-                })
-            })
+                    ...resolvePermissionOverwrites(permission.deny, true),
+                });
+            });
         })
-        .then(message.react('👌'))
+        .then(message.react('👌'));
 };
 
 exports.usage = {

@@ -9,8 +9,7 @@ module.exports = async (client) => {
     }
 
     client.user.setPresence({ activity: { name: client.config.presence } });
-
-    console.log(client.config.voiceRole.cronTime)
+    
     new CronJob(client.config.voiceRole.cronTime, function () {
         for (const guild of client.guilds.cache.values()) {
             if (!guild.hasVoiceRole()) continue;

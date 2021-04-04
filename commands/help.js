@@ -2,9 +2,9 @@ const pjson = require('../package.json');
 
 exports.run = (client, message, args) => {
     if (typeof client.config.helpCommand === 'function') {
-        return message.channel.send(client.config.helpCommand(pjson))
+        return message.channel.send(client.config.helpCommand(pjson));
     }
-    message.channel.send(client.config.helpCommand)
+    message.channel.send(client.config.helpCommand);
 };
 
 exports.usage = {

@@ -1,4 +1,4 @@
-const { Permissions, Constants } = require('discord.js')
+const { Permissions, Constants } = require('discord.js');
 
 exports.run = (client, message, args) => {
     const parent = message.guild.channels.cache.find(
