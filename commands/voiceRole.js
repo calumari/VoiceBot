@@ -38,4 +38,5 @@ exports.run = (client, message, args) => {
 exports.usage = {
     name: 'voicerole',
     aliases: ['setvoicerole'],
+    userPermissions: [Permissions.FLAGS.ADMINISTRATOR],
 };
