@@ -61,17 +61,20 @@ async function createManagedChannel({ channel, guild, member }) {
         });
 }
 
-async function removeVoiceRole({ channel, guild, member }) {
+async function removeVoiceRole({ guild, member }) {
     if (!member.hasVoiceRole()) return;
-
-    const user = channel.client.db.getUser.get(member.id, guild.id);
-    if (user && Date.now() - user['last_seen'] > guild.client.config.voiceRole.softThreshold) return;
+    const user = guild.client.db.getUser.get(member.id, guild.id);
+    const now = Date.now();
+    if (user && now - user['last_seen'] > guild.client.config.voiceRole.softThreshold) {
+        guild.client.db.replaceUser.run(member.id, guild.id, now);
+        return;
+    }
     member.roles.remove(guild.voiceRoleId);
 }
 
 async function giveVoiceRole({ guild, member }) {
-    guild.client.db.replaceUser.run(member.id, guild.id, Date.now());
     if (member.hasVoiceRole()) return;
+    guild.client.db.replaceUser.run(member.id, guild.id, Date.now());
     member.roles.add(guild.voiceRoleId);
 }
 

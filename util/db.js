@@ -14,9 +14,6 @@ db.prepare(
     );
     `
 ).run();
-try {
-    db.prepare('ALTER TABLE guild_preferences ADD COLUMN voice_role_id TEXT;').run();
-} catch (ignored) {} // TODO: migrations
 
 db.prepare(
     `

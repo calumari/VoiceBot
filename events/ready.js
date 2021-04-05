@@ -16,14 +16,18 @@ module.exports = async client => {
             for (const guild of client.guilds.cache.values()) {
                 if (!guild.hasVoiceRole()) continue;
 
-                const memberIds = guild.members.cache
+                const members = guild.members.cache
                     .filter(member => member.roles.cache.some(r => !member.voice.channel && r.id === guild.voiceRoleId))
-                    .map(member => member.id);
-                if (memberIds.length === 0) continue;
+                    .reduce((map, member) => {
+                        map[member.id] = member;
+                        return map;
+                    }, {});
+                if (Object.keys(members).length === 0) continue;
 
-                client.db.getUsers.all(memberIds, guild.id).forEach(user => {
-                    if (user && Date.now() - user['last_seen'] < guild.client.config.voiceRole.hardThreshold) return;
-                    guild.members.resolve(id)?.roles?.remove(guild.voiceRoleId);
+                client.db.getUsers.all(Object.keys(members), guild.id).forEach(user => {
+                    const member = members[user.id];
+                    if (!member || Date.now() - user['last_seen'] < client.config.voiceRole.hardThreshold) return;
+                    member.roles.remove(guild.voiceRoleId);
                 });
             }
         },
