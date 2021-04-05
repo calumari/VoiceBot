@@ -110,6 +110,7 @@ module.exports = {
     deleteChannelPreferencePermissions: db.prepare('DELETE FROM channel_permissions WHERE user_id=? AND parent_id=?;'),
 
     getUser: db.prepare('SELECT * FROM guild_user WHERE id=? AND guild_id=?;'),
-    getUsers: db.prepare('SELECT * FROM guild_user WHERE id IN (?) AND guild_id=?;'),
+    getUsers: (memberIds, guildId) =>
+        db.prepare(`SELECT * FROM guild_user WHERE id IN (${memberIds.join(',')}) AND guild_id=?;`).all(guildId), // https://github.com/JoshuaWise/better-sqlite3/issues/81
     replaceUser: db.prepare('INSERT OR REPLACE INTO guild_user(id, guild_id, last_seen) VALUES(?, ?, ?)'),
 };

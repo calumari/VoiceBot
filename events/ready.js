@@ -24,7 +24,7 @@ module.exports = async client => {
                     }, {});
                 if (Object.keys(members).length === 0) continue;
 
-                client.db.getUsers.all(Object.keys(members), guild.id).forEach(user => {
+                client.db.getUsers(Object.keys(members), guild.id).forEach(user => {
                     const member = members[user.id];
                     if (!member || Date.now() - user['last_seen'] < client.config.voiceRole.hardThreshold) return;
                     member.roles.remove(guild.voiceRoleId);
