@@ -17,7 +17,7 @@ module.exports = async client => {
                 if (!guild.hasVoiceRole()) continue;
 
                 const memberIds = guild.members.cache
-                    .filter(member => member.roles.cache.some(r => member.voice.channel && r.id === guild.voiceRoleId))
+                    .filter(member => member.roles.cache.some(r => !member.voice.channel && r.id === guild.voiceRoleId))
                     .map(member => member.id);
                 if (memberIds.length === 0) continue;
 
