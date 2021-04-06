@@ -73,7 +73,7 @@ async function removeVoiceRole({ guild, member }) {
 }
 
 async function giveVoiceRole({ guild, member }) {
-    if (member.hasVoiceRole()) return;
+    if (!guild.hasVoiceRole() || member.hasVoiceRole()) return;
     guild.client.db.replaceUser.run(member.id, guild.id, Date.now());
     member.roles.add(guild.voiceRoleId);
 }
