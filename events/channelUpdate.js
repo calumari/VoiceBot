@@ -16,7 +16,7 @@ module.exports = (client, old, updated) => {
     client.db.deleteChannelPreferencePermissions.run(ownerId, updated.parentID);
 
     for (const overwrite of updated.permissionOverwrites.values()) {
-        if (updated.parent.permissionOverwrites.find(ow => ow.id === overwrite.id)) continue;
+        if (overwrite.id === ownerId || updated.parent.permissionOverwrites.find(ow => ow.id === overwrite.id)) continue;
         client.db.insertChannelPreferencePermissions.run(
             ownerId,
             updated.parentID,
