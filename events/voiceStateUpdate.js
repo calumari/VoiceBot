@@ -41,7 +41,7 @@ async function createManagedChannel({ channel, guild, member }) {
                 timestamp: new Date(),
                 author: {
                     name: guild.name,
-                    icon_url: guild.iconURL,
+                    icon_url: guild.iconURL({ dynamic: true }),
                 },
             },
         });
