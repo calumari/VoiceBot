@@ -57,7 +57,7 @@ async function createManagedChannel({ channel, guild, member }) {
         })
         .then(ch => {
             guild.addManagedChannel(ch, member);
-            member.voice.setChannel(ch);
+            member.voice.setChannel(ch).catch(() => deleteManagedChannel({ channel: ch, guild }));
         });
 }
 
