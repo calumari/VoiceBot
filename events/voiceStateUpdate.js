@@ -34,7 +34,7 @@ async function createManagedChannel({ channel, guild, member }) {
     if (!guild.isTriggerChannel(channel.id)) return;
 
     const cooldown = getChannelCreationCooldown(member);
-    if (cooldown) {
+    if (cooldown && cooldown.now < cooldown.expirationTime) {
         member.user.send(
             `Quit creating channels so fast - please wait ${cooldown.timeLeft.toFixed(1)} more second(s)!`
         );
