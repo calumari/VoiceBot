@@ -1,7 +1,16 @@
-const { Permissions } = require('discord.js');
+const { Permissions, Collection } = require('discord.js');
 const { resolvePermissionOverwrites } = require('../util/utils');
 
-async function deleteManagedChannel({ channel, guild }) {
+const cooldowns = new Collection();
+
+function getChannelCreationCooldown(member) {
+    if (!cooldowns.has(member.user.id)) return null;
+    const now = Date.now();
+    const expirationTime = cooldowns.get(member.user.id) + member.guild.client.config.cooldowns.create;
+    return { now, expirationTime, timeLeft: (expirationTime - now) / 1000 };
+}
+
+async function deleteManagedChannel({ channel, guild, member }) {
     if (!guild.isManagedChannel(channel.id) || !channel.isEmpty(channel.client.config.ignoreBots)) return;
     if (!guild.me.hasPermission(Permissions.FLAGS.MANAGE_CHANNELS)) {
         return guild.sendAlert({
@@ -14,10 +23,24 @@ async function deleteManagedChannel({ channel, guild }) {
 
     await channel.delete();
     guild.removeManagedChannel(channel.id);
+
+    const cooldown = getChannelCreationCooldown(member);
+    if (cooldown && cooldown.now >= cooldown.expirationTime) {
+        cooldowns.clear(member.user.id);
+    }
 }
 
 async function createManagedChannel({ channel, guild, member }) {
     if (!guild.isTriggerChannel(channel.id)) return;
+
+    const cooldown = getChannelCreationCooldown(member);
+    if (cooldown) {
+        member.user.send(
+            `Quit creating channels so fast - please wait ${cooldown.timeLeft.toFixed(1)} more second(s)!`
+        );
+        return member.voice.setChannel(null);
+    }
+
     if (!guild.me.hasPermission([Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MOVE_MEMBERS])) {
         return guild.sendAlert({
             embed: {
@@ -59,6 +82,8 @@ async function createManagedChannel({ channel, guild, member }) {
             guild.addManagedChannel(ch, member);
             member.voice.setChannel(ch).catch(() => deleteManagedChannel({ channel: ch, guild }));
         });
+
+    cooldowns.set(member.user.id, Date.now());
 }
 
 async function removeVoiceRole({ guild, member }) {
@@ -78,7 +103,7 @@ async function giveVoiceRole({ guild, member }) {
     member.roles.add(guild.voiceRoleId);
 }
 
-module.exports = (client, oldState, newState) => {
+module.exports = async (client, oldState, newState) => {
     if (newState.member.user.bot) return;
     try {
         if (oldState.channelID) {
