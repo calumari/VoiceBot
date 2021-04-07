@@ -4,9 +4,9 @@ const { resolvePermissionOverwrites } = require('../util/utils');
 const cooldowns = new Collection();
 
 function getChannelCreationCooldown(member) {
-    if (!cooldowns.has(member.user.id)) return null;
+    if (!cooldowns.has(member.id) || member.client.config.botOwners.some(id => member.id === id)) return null;
     const now = Date.now();
-    const expirationTime = cooldowns.get(member.user.id) + member.guild.client.config.cooldowns.create;
+    const expirationTime = cooldowns.get(member.id) + member.client.config.cooldowns.create;
     return { now, expirationTime, timeLeft: (expirationTime - now) / 1000 };
 }
 
@@ -26,7 +26,7 @@ async function deleteManagedChannel({ channel, guild, member }) {
 
     const cooldown = getChannelCreationCooldown(member);
     if (cooldown && cooldown.now >= cooldown.expirationTime) {
-        cooldowns.clear(member.user.id);
+        cooldowns.clear(member.id);
     }
 }
 
@@ -35,9 +35,16 @@ async function createManagedChannel({ channel, guild, member }) {
 
     const cooldown = getChannelCreationCooldown(member);
     if (cooldown && cooldown.now < cooldown.expirationTime) {
-        member.user.send(
-            `Quit creating channels so fast - please wait ${cooldown.timeLeft.toFixed(1)} more second(s)!`
-        );
+        member.user.send({
+            embed: {
+                description: `You're creating channels too fast, please try again in ${Math.round(cooldown.timeLeft)} second(s)!`,
+                timestamp: new Date(),
+                author: {
+                    name: guild.name,
+                    icon_url: guild.iconURL,
+                },
+            },
+        });
         return member.voice.setChannel(null);
     }
 
@@ -83,7 +90,7 @@ async function createManagedChannel({ channel, guild, member }) {
             member.voice.setChannel(ch).catch(() => deleteManagedChannel({ channel: ch, guild }));
         });
 
-    cooldowns.set(member.user.id, Date.now());
+    cooldowns.set(member.id, Date.now());
 }
 
 async function removeVoiceRole({ guild, member }) {

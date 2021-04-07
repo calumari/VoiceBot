@@ -1,6 +1,8 @@
 module.exports = {
     token: 'your_token_here',
 
+    botOwners: [],
+
     /**
      * Should managed channels be removed if they only contain bots?
      * Default: true
@@ -49,5 +51,9 @@ module.exports = {
         softThreshold: 600000,
 
         hardThreshold: 21600000,
+    },
+
+    cooldowns: {
+        create: 5000,
     },
 };
