@@ -1,4 +1,4 @@
-const { Structures } = require('discord.js');
+const { Structures, Permissions } = require('discord.js');
 
 module.exports = Structures.extend('GuildMember', GuildMember => {
     class ExtendedGuildMember extends GuildMember {

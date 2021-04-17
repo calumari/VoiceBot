@@ -16,7 +16,7 @@ db.prepare(
 ).run();
 try {
     db.prepare('ALTER TABLE guild_preferences ADD COLUMN voice_manager_role_id TEXT;').run();
-} catch(e){}
+} catch (e) {}
 
 db.prepare(
     `
