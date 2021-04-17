@@ -28,7 +28,7 @@ exports.run = (client, message, label, args) => {
         );
     }
 
-    const preferences = client.db.selectChannelPreferences(message.member.id, channel.id) || {};
+    const preferences = client.db.selectChannelPreferences(message.member.id, channel.parentID) || {};
     message.guild.transferManagedChannel(channel.id, message.member.id);
 
     channel
