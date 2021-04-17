@@ -1,3 +1,4 @@
+const { Permissions } = require('discord.js')
 const { resolvePermissionOverwrites } = require('../util/utils');
 
 exports.run = (client, message, label, args) => {
