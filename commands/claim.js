@@ -22,8 +22,11 @@ exports.run = (client, message, label, args) => {
         return message.reply(`you're not in a managed voice channel!`);
     } else if (ownerId == message.member.id) {
         return message.reply('you already own that channel!');
-    } else if (channel.members.find(member => member.id === ownerId) &&
-        (!message.member.hasVoiceManagerRole() || channel.members.get(ownerId).hasPermission(Permissions.FLAGS.ADMINISTRATOR))) {
+    } else if (
+        channel.members.find(member => member.id === ownerId) &&
+        (!message.member.hasVoiceManagerRole() ||
+            channel.members.get(ownerId).hasPermission(Permissions.FLAGS.ADMINISTRATOR))
+    ) {
         return message.reply(
             `I think <@${ownerId}> might disagree with that. Maybe wait until they leave before claiming their channel?`
         );
