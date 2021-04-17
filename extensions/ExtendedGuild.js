@@ -47,6 +47,19 @@ module.exports = Structures.extend('Guild', Guild => {
             return this.voiceRoleId !== null && this.roles.cache.some(r => r.id === this.voiceRoleId);
         }
 
+        get voiceManagerRoleId() {
+            return this.preferences['voice_manager_role_id'];
+        }
+
+        set voiceManagerRoleId(roleId) {
+            this.preferences['voice_manager_role_id'] = roleId;
+            this.client.db.updateVoiceManagerRoleId.run(roleId, this.id);
+        }
+
+        hasVoiceManagerRole() {
+            return this.voiceManagerRoleId !== null && this.roles.cache.some(r => r.id === this.voiceManagerRoleId);
+        }
+
         sendAlert(message) {
             const channel = this.defaultChannel;
             if (channel) {

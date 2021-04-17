@@ -8,9 +8,9 @@ module.exports = (client, message) => {
 
     const [, match] = message.content.match(prefixRegex);
     const args = message.content.slice(match.length).trim().split(/\s+/g);
-    const cmd = args.shift().toLowerCase();
+    const label = args.shift().toLowerCase();
 
-    const command = client.commands.get(cmd) || client.aliases.get(cmd);
+    const command = client.commands.get(label) || client.aliases.get(label);
     if (!command) return;
 
     if (!message.member.hasPermission(command.usage.userPermissions)) return;
@@ -20,5 +20,5 @@ module.exports = (client, message) => {
         );
     }
 
-    command.run(client, message, args);
+    command.run(client, message, label, args);
 };

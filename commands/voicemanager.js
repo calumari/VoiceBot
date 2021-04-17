@@ -2,18 +2,11 @@ const { Permissions } = require('discord.js');
 
 exports.run = (client, message, label, args) => {
     const roleIdOrName = args[0];
-    if ((!roleIdOrName || roleIdOrName === 'clear') && message.guild.hasVoiceRole()) {
-        const roleId = message.guild.voiceRoleId;
-        message.guild.voiceRoleId = null;
-        if (args[1] !== 'true') {
-            return message.reply('voice role cleared.');
-        }
-
-        message.guild.members.cache
-            .filter(member => member.roles.cache.find(r => r.id === message.guild.voiceRoleId))
-            .forEach(member => member.roles.cache.remove(roleId));
-        return message.reply('voice role cleared and role removed from users.');
+    if ((!roleIdOrName || roleIdOrName === 'clear') && message.guild.hasVoiceManagerRole()) {
+        message.guild.voiceManagerRoleId = null;
+        return message.reply('voice manager role cleared.');
     }
+
     if (!roleIdOrName) {
         return message.reply(
             `you didn't provide a role id or name, stupid. usage: \`${message.guild.prefix}${label} <role id or name>\``
@@ -33,12 +26,12 @@ exports.run = (client, message, label, args) => {
         return message.reply(`you're either stupid or mistyped. ${role.name} has admin permission.`);
     }
 
-    message.guild.voiceRoleId = role.id;
-    message.reply(`voice role updated to "${role.name}".`);
+    message.guild.voiceManagerRoleId = role.id;
+    message.reply(`voice manager role updated to "${role.name}".`);
 };
 
 exports.usage = {
-    name: 'voicerole',
-    aliases: ['setvoicerole'],
+    name: 'voicemanager',
+    aliases: ['setvoicemanager', 'voicemanagerole', 'setvoicemanagerrole'],
     userPermissions: [Permissions.FLAGS.ADMINISTRATOR],
 };

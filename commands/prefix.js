@@ -1,6 +1,6 @@
 const { Permissions } = require('discord.js');
 
-exports.run = (client, message, args) => {
+exports.run = (client, message, label, args) => {
     const prefix = args[0];
     if (!prefix || prefix.length > 1) return;
     message.guild.prefix = prefix;

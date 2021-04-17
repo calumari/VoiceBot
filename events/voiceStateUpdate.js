@@ -37,7 +37,9 @@ async function createManagedChannel({ channel, guild, member }) {
     if (cooldown && cooldown.now < cooldown.expirationTime) {
         member.user.send({
             embed: {
-                description: `You're creating channels too fast, please try again in ${Math.round(cooldown.timeLeft)} second(s)!`,
+                description: `You're creating channels too fast, please try again in ${Math.round(
+                    cooldown.timeLeft
+                )} second(s)!`,
                 timestamp: new Date(),
                 author: {
                     name: guild.name,

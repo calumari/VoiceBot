@@ -1,6 +1,6 @@
 const { Permissions } = require('discord.js');
 
-exports.run = async (client, message, args) => {
+exports.run = async (client, message, label, args) => {
     try {
         let parent = message.guild.channels.cache.find(
             c => c.name === client.config.categoryName && c.type === 'category'

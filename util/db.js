@@ -14,6 +14,9 @@ db.prepare(
     );
     `
 ).run();
+try {
+    db.prepare('ALTER TABLE guild_preferences ADD COLUMN voice_manager_role_id TEXT;').run();
+} catch(e){}
 
 db.prepare(
     `
@@ -81,6 +84,7 @@ module.exports = {
     selectGuildById: db.prepare('SELECT * FROM guild_preferences WHERE id=?;'),
     updateGuildPrefix: db.prepare('UPDATE guild_preferences SET prefix=? WHERE id=?;'),
     updateVoiceRoleId: db.prepare('UPDATE guild_preferences SET voice_role_id=? WHERE id=?;'),
+    updateVoiceManagerRoleId: db.prepare('UPDATE guild_preferences SET voice_manager_role_id=? WHERE id=?;'),
 
     insertGuildChannel: db.prepare('INSERT INTO guild_channels (id, user_id, guild_id) VALUES (?, ?, ?);'),
     selectGuildChannelsByGuild: db.prepare('SELECT id, user_id FROM guild_channels WHERE guild_id=?;'),
