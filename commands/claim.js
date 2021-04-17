@@ -24,7 +24,7 @@ exports.run = (client, message, label, args) => {
         return message.reply('you already own that channel!');
     } else if (
         (channel.members.find(member => member.id === ownerId) && !message.member.hasVoiceManagerRole()) ||
-        (channel.members.resolve(ownerId).hasPermission(Permissions.FLAGS.ADMINISTRATOR) &&
+        (channel.members.get(ownerId).hasPermission(Permissions.FLAGS.ADMINISTRATOR) &&
             !message.member.hasPermission(Permissions.FLAGS.ADMINISTRATOR))
     ) {
         return message.reply(
