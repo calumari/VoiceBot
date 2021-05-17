@@ -1,6 +1,8 @@
 module.exports = {
     token: 'your_token_here',
 
+    botOwners: [],
+
     /**
      * Should managed channels be removed if they only contain bots?
      * Default: true
@@ -19,20 +21,14 @@ module.exports = {
 
     presence: '.help | .invite',
 
-    motd: {
-        "embed": {
-            "title": "VoiceBoy",
-            "description": "Hello world!",
-            "url": "https://github.com/calumari/VoiceBoy"
-        }
-    },
+    motd: null,
 
-    helpCommand: {
+    helpCommand: pjson => ({
         embed: {
             title: '**VoiceBoy**',
-            url: 'https://github.com/calumari/VoiceBoy',
+            url: `${pjson.homepage}`,
             footer: {
-                text: 'Created by calumari#0001 • v2.0.0',
+                text: `Created by calumari#0001 • v${pjson.version}`,
             },
             fields: [
                 {
@@ -43,9 +39,21 @@ module.exports = {
                 {
                     name: 'Admin',
                     value:
-                        "`.setup`\nCreates a VoiceBoy trigger channel. This can be run multiple times!\n\n`.prefix <prefix>`\nSets VoiceBoy's command prefix. Default prefix: '.'\n\n`.cleanup`\nCleans up unused/empty channels left by VoiceBoy.",
+                        "`.setup`\nCreates a VoiceBoy trigger channel. This can be run multiple times!\n\n`.prefix <prefix>`\nSets VoiceBoy's command prefix. Default prefix: '.'\n\n`.cleanup`\nCleans up unused/empty channels left by VoiceBoy.\n\n`.voicerole <role name or id>`\nGive users a role while in a voice channel.",
                 },
             ],
         },
+    }),
+
+    voiceRole: {
+        cronTime: '* */1 * * *',
+
+        softThreshold: 600000,
+
+        hardThreshold: 21600000,
+    },
+
+    cooldowns: {
+        create: 5000,
     },
 };

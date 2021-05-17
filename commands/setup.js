@@ -1,16 +1,23 @@
-exports.run = async (client, message, args) => {
+const { Permissions } = require('discord.js');
+
+exports.run = async (client, message, label, args) => {
     try {
         let parent = message.guild.channels.cache.find(
             c => c.name === client.config.categoryName && c.type === 'category'
         );
         if (!parent) {
-            parent = await message.guild.channels.create(client.config.categoryName, { type: 'category' });
+            parent = await message.guild.channels.create(client.config.categoryName, {
+                type: 'category',
+            });
         }
 
         const count = parent.children.filter(c => c.name.startsWith(client.config.channelName)).size;
         const name = count > 0 ? client.config.channelNameSimilar(count) : client.config.channelName;
 
-        const channel = await message.guild.channels.create(name, { type: 'voice', parent: parent.id });
+        const channel = await message.guild.channels.create(name, {
+            type: 'voice',
+            parent: parent.id,
+        });
         message.guild.addTriggerChannel(channel);
 
         message.channel.send({
@@ -26,6 +33,6 @@ exports.run = async (client, message, args) => {
 
 exports.usage = {
     name: 'setup',
-    userPermissions: ['ADMINISTRATOR'],
-    clientPermissions: ['MANAGE_CHANNELS'],
+    userPermissions: [Permissions.FLAGS.ADMINISTRATOR],
+    clientPermissions: [Permissions.FLAGS.MANAGE_CHANNELS],
 };

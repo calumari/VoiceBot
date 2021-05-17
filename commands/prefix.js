@@ -1,12 +1,14 @@
-exports.run = (client, message, args) => {
+const { Permissions } = require('discord.js');
+
+exports.run = (client, message, label, args) => {
     const prefix = args[0];
     if (!prefix || prefix.length > 1) return;
-    client.db.updateGuildPrefix.run(prefix, message.guild.id);
-    message.reply(`Prefix updated to "${prefix}"!`)
+    message.guild.prefix = prefix;
+    message.reply(`Prefix updated to "${prefix}"!`);
 };
 
 exports.usage = {
     name: 'prefix',
     aliases: ['setprefix'],
-    userPermissions: ['ADMINISTRATOR'],
+    userPermissions: [Permissions.FLAGS.ADMINISTRATOR],
 };

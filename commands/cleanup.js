@@ -1,4 +1,6 @@
-exports.run = (client, message, args) => {
+const { Permissions } = require('discord.js');
+
+exports.run = (client, message, label, args) => {
     const parent = message.guild.channels.cache.find(
         c => c.name === client.config.categoryName && c.type === 'category'
     );
@@ -10,5 +12,5 @@ exports.run = (client, message, args) => {
 
 exports.usage = {
     name: 'cleanup',
-    userPermissions: ['ADMINISTRATOR'],
+    userPermissions: [Permissions.FLAGS.ADMINISTRATOR],
 };

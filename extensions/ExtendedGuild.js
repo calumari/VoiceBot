@@ -4,7 +4,10 @@ module.exports = Structures.extend('Guild', Guild => {
     class ExtendedGuild extends Guild {
         constructor(...args) {
             super(...args);
-            this.managed = this.client.db.selectGuildChannelsByGuild.all(this.id).reduce((obj, item) => Object.assign(obj, { [item.id]: item['user_id'] }), {});
+            this.preferences = this.client.db.selectGuildById.get(this.id);
+            this.managed = this.client.db.selectGuildChannelsByGuild
+                .all(this.id)
+                .reduce((obj, item) => Object.assign(obj, { [item.id]: item['user_id'] }), {});
             this.triggers = this.client.db.selectGuildTriggersByGuild.all(this.id).map(result => result.id);
         }
 
@@ -20,6 +23,41 @@ module.exports = Structures.extend('Guild', Guild => {
                 .find(c => c.type === 'text' && c.permissionsFor(this.me).has('SEND_MESSAGES'))
                 .sort((a, b) => a.position - b.position)
                 .first();
+        }
+
+        get prefix() {
+            return this.preferences.prefix ?? this.client.config.commandPrefix;
+        }
+
+        set prefix(prefix) {
+            this.preferences.prefix = prefix;
+            this.client.db.updateGuildPrefix.run(prefix, this.id);
+        }
+
+        get voiceRoleId() {
+            return this.preferences['voice_role_id'];
+        }
+
+        set voiceRoleId(roleId) {
+            this.preferences['voice_role_id'] = roleId;
+            this.client.db.updateVoiceRoleId.run(roleId, this.id);
+        }
+
+        hasVoiceRole() {
+            return this.voiceRoleId !== null && this.roles.cache.some(r => r.id === this.voiceRoleId);
+        }
+
+        get voiceManagerRoleId() {
+            return this.preferences['voice_manager_role_id'];
+        }
+
+        set voiceManagerRoleId(roleId) {
+            this.preferences['voice_manager_role_id'] = roleId;
+            this.client.db.updateVoiceManagerRoleId.run(roleId, this.id);
+        }
+
+        hasVoiceManagerRole() {
+            return this.voiceManagerRoleId !== null && this.roles.cache.some(r => r.id === this.voiceManagerRoleId);
         }
 
         sendAlert(message) {

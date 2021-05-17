@@ -1,8 +1,18 @@
+const { Permissions, Collection } = require('discord.js');
 const { resolvePermissionOverwrites } = require('../util/utils');
 
-async function handleLeave({ channel, guild }) {
+const cooldowns = new Collection();
+
+function getChannelCreationCooldown(member) {
+    if (!cooldowns.has(member.id) || member.client.config.botOwners.some(id => member.id === id)) return null;
+    const now = Date.now();
+    const expirationTime = cooldowns.get(member.id) + member.client.config.cooldowns.create;
+    return { now, expirationTime, timeLeft: (expirationTime - now) / 1000 };
+}
+
+async function deleteManagedChannel({ channel, guild, member }) {
     if (!guild.isManagedChannel(channel.id) || !channel.isEmpty(channel.client.config.ignoreBots)) return;
-    if (!guild.me.hasPermission('MANAGE_CHANNELS')) {
+    if (!guild.me.hasPermission(Permissions.FLAGS.MANAGE_CHANNELS)) {
         return guild.sendAlert({
             embed: {
                 title: 'Oh dear...',
@@ -13,11 +23,34 @@ async function handleLeave({ channel, guild }) {
 
     await channel.delete();
     guild.removeManagedChannel(channel.id);
+
+    const cooldown = getChannelCreationCooldown(member);
+    if (cooldown && cooldown.now >= cooldown.expirationTime) {
+        cooldowns.clear(member.id);
+    }
 }
 
-async function handleJoin({ channel, guild, member }) {
+async function createManagedChannel({ channel, guild, member }) {
     if (!guild.isTriggerChannel(channel.id)) return;
-    if (!guild.me.hasPermission(['MANAGE_CHANNELS', 'MOVE_MEMBERS'])) {
+
+    const cooldown = getChannelCreationCooldown(member);
+    if (cooldown && cooldown.now < cooldown.expirationTime) {
+        member.user.send({
+            embed: {
+                description: `You're creating channels too fast, please try again in ${Math.round(
+                    cooldown.timeLeft
+                )} second(s)!`,
+                timestamp: new Date(),
+                author: {
+                    name: guild.name,
+                    icon_url: guild.iconURL({ dynamic: true }),
+                },
+            },
+        });
+        return member.voice.setChannel(null);
+    }
+
+    if (!guild.me.hasPermission([Permissions.FLAGS.MANAGE_CHANNELS, Permissions.FLAGS.MOVE_MEMBERS])) {
         return guild.sendAlert({
             embed: {
                 title: 'Oh dear...',
@@ -44,28 +77,55 @@ async function handleJoin({ channel, guild, member }) {
             bitrate: preferences.bitrate,
         })
         .then(ch => ch.lockPermissions())
-        .then(ch => ch.createOverwrite(member.id, { 'VIEW_CHANNEL': true, 'SPEAK': true, 'MANAGE_CHANNELS': true }))
+        .then(ch => ch.createOverwrite(member.id, { VIEW_CHANNEL: true, SPEAK: true, MANAGE_CHANNELS: true }))
         .then(ch => {
             preferences.permissions.forEach(permission => {
                 ch.createOverwrite(permission['user_or_role_id'], {
                     ...resolvePermissionOverwrites(permission.allow, false),
-                    ...resolvePermissionOverwrites(permission.deny, true)
-                })
-            })
-            return ch
+                    ...resolvePermissionOverwrites(permission.deny, true),
+                });
+            });
+            return ch;
         })
         .then(ch => {
             guild.addManagedChannel(ch, member);
-            member.voice.setChannel(ch);
+            member.voice.setChannel(ch).catch(() => deleteManagedChannel({ channel: ch, guild }));
         });
+
+    cooldowns.set(member.id, Date.now());
 }
 
-module.exports = (client, oldState, newState) => {
+async function removeVoiceRole({ guild, member }) {
+    if (!member.hasVoiceRole()) return;
+    const user = guild.client.db.getUser.get(member.id, guild.id);
+    const now = Date.now();
+    if (user && now - user['last_seen'] > guild.client.config.voiceRole.softThreshold) {
+        guild.client.db.replaceUser.run(member.id, guild.id, now);
+        return;
+    }
+    member.roles.remove(guild.voiceRoleId);
+}
+
+async function giveVoiceRole({ guild, member }) {
+    if (!guild.hasVoiceRole() || member.hasVoiceRole()) return;
+    guild.client.db.replaceUser.run(member.id, guild.id, Date.now());
+    member.roles.add(guild.voiceRoleId);
+}
+
+module.exports = async (client, oldState, newState) => {
+    if (newState.member.user.bot) return;
     try {
-        if (oldState.channelID) handleLeave(oldState);
-        if (newState.channelID) handleJoin(newState);
+        if (oldState.channelID) {
+            deleteManagedChannel(oldState);
+            if (!newState.channelID) {
+                removeVoiceRole(oldState);
+            }
+        }
+        if (newState.channelID) {
+            createManagedChannel(newState);
+            giveVoiceRole(newState);
+        }
     } catch (err) {
-        // todo: explain what happened to user/owner
-        console.log(err);
+        console.error(err); // todo: explain what happened to user/owner
     }
 };
