@@ -8,8 +8,7 @@ require('./extensions/ExtendedVoiceChannel');
 const intents = new Discord.Intents();
 intents.add(Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.NON_PRIVILEGED);
 
-const client = new Discord.Client({ fetchAllMembers: true, ws: { intents: intents } }); // todo: move to own class
-// const client = new Discord.Client({ ws: { intents: intents } }); // todo: move to own class
+const client = new Discord.Client({ fetchAllMembers: true, ws: { intents: intents } });
 
 client.config = require('./config');
 client.db = require('./util/db');
@@ -35,7 +34,13 @@ readdirSync('./events')
     .forEach(f => {
         const name = f.substring(0, f.indexOf('.'));
         console.log(`Loading event: ${name}`);
-        client.on(name, require(`./events/${f}`).bind(null, client));
+        const event = require(`./events/${f}`);
+        const listener = event.run.bind(null, client);
+        if (event.once) {
+            client.once(name, listener);
+        } else {
+            client.on(name, listener);
+        }
         delete require.cache[require.resolve(`./events/${f}`)];
     });
 

@@ -112,20 +112,22 @@ async function giveVoiceRole({ guild, member }) {
     member.roles.add(guild.voiceRoleId);
 }
 
-module.exports = async (client, oldState, newState) => {
-    if (newState.member.user.bot) return;
-    try {
-        if (oldState.channelID) {
-            deleteManagedChannel(oldState);
-            if (!newState.channelID) {
-                removeVoiceRole(oldState);
+module.exports = {
+    run: async (client, oldState, newState) => {
+        if (newState.member.user.bot) return;
+        try {
+            if (oldState.channelID) {
+                deleteManagedChannel(oldState);
+                if (!newState.channelID) {
+                    removeVoiceRole(oldState);
+                }
             }
+            if (newState.channelID) {
+                createManagedChannel(newState);
+                giveVoiceRole(newState);
+            }
+        } catch (err) {
+            console.error(err); // todo: explain what happened to user/owner
         }
-        if (newState.channelID) {
-            createManagedChannel(newState);
-            giveVoiceRole(newState);
-        }
-    } catch (err) {
-        console.error(err); // todo: explain what happened to user/owner
     }
-};
+}

@@ -53,3 +53,8 @@ exports.run = (client, message, label, args) => {
 exports.usage = {
     name: 'claim',
 };
+
+exports.slashCommand = {
+    name: 'claim',
+    description: 'Claim your current voice channel if the owner is no longer present.'
+}
