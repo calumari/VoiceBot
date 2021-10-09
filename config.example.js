@@ -52,6 +52,8 @@ module.exports = {
     voiceRole: {
         cronTime: '* */1 * * *',
 
+        interval: 300000,
+
         softThreshold: 600000,
 
         hardThreshold: 21600000,
