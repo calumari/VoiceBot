@@ -1,0 +1,7 @@
+services:
+  voiceboy:
+    build: .
+    image: calumari/voiceboy
+    volumes:
+      - ./data:/usr/src/app/data
+      - ./config.js:/usr/src/app/config.js

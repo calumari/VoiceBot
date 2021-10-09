@@ -5,11 +5,10 @@ require('./extensions/ExtendedGuild');
 require('./extensions/ExtendedGuildMember');
 require('./extensions/ExtendedVoiceChannel');
 
-const intents = new Discord.Intents();
-intents.add(Discord.Intents.FLAGS.GUILD_MEMBERS, Discord.Intents.NON_PRIVILEGED);
-
-const client = new Discord.Client({ fetchAllMembers: true, ws: { intents: intents } }); // todo: move to own class
-// const client = new Discord.Client({ ws: { intents: intents } }); // todo: move to own class
+const client = new Discord.Client({
+    fetchAllMembers: true,
+    ws: { intents: Discord.Intents.FLAGS.GUILD_MEMBERS | Discord.Intents.NON_PRIVILEGED },
+});
 
 client.config = require('./config');
 client.db = require('./util/db');

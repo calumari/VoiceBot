@@ -4,7 +4,7 @@ module.exports = Structures.extend('Guild', Guild => {
     class ExtendedGuild extends Guild {
         constructor(...args) {
             super(...args);
-            this.preferences = this.client.db.selectGuildById.get(this.id);
+            this.preferences = this.client.db.selectGuildById.get(this.id) || {};
             this.managed = this.client.db.selectGuildChannelsByGuild
                 .all(this.id)
                 .reduce((obj, item) => Object.assign(obj, { [item.id]: item['user_id'] }), {});

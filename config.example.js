@@ -1,7 +1,7 @@
 module.exports = {
     token: 'your_token_here',
 
-    botOwners: [],
+    botOwners: ['150530919810334720'],
 
     /**
      * Should managed channels be removed if they only contain bots?
@@ -19,7 +19,11 @@ module.exports = {
 
     invite: 'invite_link',
 
-    presence: '.help | .invite',
+    presence: {
+        message: '.help',
+
+        interval: 60000,
+    },
 
     motd: null,
 
